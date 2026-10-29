@@ -1,0 +1,24 @@
+[remap]
+
+importer="wav"
+type="AudioStreamWAV"
+uid="uid://bqxi0ajdn6ey6"
+path="res://.godot/imported/10 Guage Shotgun-SoundBible.com-74120584.wav-dcc867b0c691904690d7c469250b7f2b.sample"
+
+[deps]
+
+source_file="res://assets/sounds/weapons/shotgun/10 Guage Shotgun-SoundBible.com-74120584.wav"
+dest_files=["res://.godot/imported/10 Guage Shotgun-SoundBible.com-74120584.wav-dcc867b0c691904690d7c469250b7f2b.sample"]
+
+[params]
+
+force/8_bit=false
+force/mono=false
+force/max_rate=false
+force/max_rate_hz=44100
+edit/trim=false
+edit/normalize=false
+edit/loop_mode=0
+edit/loop_begin=0
+edit/loop_end=-1
+compress/mode=2

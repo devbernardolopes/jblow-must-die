@@ -17,12 +17,10 @@ func _ready() -> void:
 		add_child(p)
 		_pool.append(p)
 
-
 func set_listener_target(node: Node2D) -> void:
 	_listener_target = node
 
-
-func play_at(world_m: Vector2, stream: AudioStream, loop: bool = false) -> AudioStreamPlayer2D:
+func play_at(world_m: Vector2, stream: AudioStream) -> AudioStreamPlayer2D:
 	if stream == null:
 		return null
 	if _listener_target == null:
@@ -33,10 +31,7 @@ func play_at(world_m: Vector2, stream: AudioStream, loop: bool = false) -> Audio
 		return null
 	var listener_m := Vector2.ZERO
 	if _listener_target != null:
-		listener_m = Vector2(
-			_listener_target.global_position.x / Units.PX_PER_METER,
-			_listener_target.global_position.y / Units.PX_PER_METER
-		)
+		listener_m = Vector2(_listener_target.global_position.x / Units.PX_PER_METER, _listener_target.global_position.y / Units.PX_PER_METER)
 	var dist_m: float = world_m.distance_to(listener_m)
 	if dist_m > RANGE_M:
 		return null
@@ -45,16 +40,15 @@ func play_at(world_m: Vector2, stream: AudioStream, loop: bool = false) -> Audio
 		return null
 	p.global_position = Vector2(world_m.x * Units.PX_PER_METER, world_m.y * Units.PX_PER_METER)
 	p.stream = stream
+	#p.stream.get_property_list().has("name", "loop")
 	#(p as AudioStreamPlayer2D).stream.set set_l loop = loop
 	p.play()
 	return p
-
 
 func update_listener() -> void:
 	# Listener is handled by an AudioListener2D node near the player; this manager
 	# only updates pool positions when sources move.
 	pass
-
 
 func _find_available() -> AudioStreamPlayer2D:
 	for p: AudioStreamPlayer2D in _pool:

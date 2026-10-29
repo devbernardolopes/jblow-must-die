@@ -308,6 +308,8 @@ func _fire() -> void:
 	var start: float = -spread_rad * 0.5
 	var pellet_damage: float = current_weapon.get_projectile_damage()
 	_consume_ammo(current_weapon)
+	if current_weapon.shoot_stream:
+		AudioManager.play_at(origin / Units.PX_PER_METER, current_weapon.shoot_stream)
 	for index: int in range(count):
 		var direction: Vector2 = forward.rotated(start + step * float(index))
 		Projectile.spawn(current_weapon.projectile, origin, direction, self, pellet_damage)

@@ -26,6 +26,11 @@ extends Resource
 ## Action id resolved against the equipped animation set when reloading.
 @export var reload_action: StringName = &"reload"
 
+@export_category("Sounds")
+@export var shoot_stream: AudioStream = null
+@export var reload_stream: AudioStream = null
+@export var dry_stream: AudioStream = null
+
 func can_shoot() -> bool:
 	return kind == "Gun" and projectile != null
 

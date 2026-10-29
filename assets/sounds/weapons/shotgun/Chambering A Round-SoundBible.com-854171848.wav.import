@@ -1,0 +1,24 @@
+[remap]
+
+importer="wav"
+type="AudioStreamWAV"
+uid="uid://1xwo71fkd0vx"
+path="res://.godot/imported/Chambering A Round-SoundBible.com-854171848.wav-902b4418fe44607dbaadfa82ad08fa19.sample"
+
+[deps]
+
+source_file="res://assets/sounds/weapons/shotgun/Chambering A Round-SoundBible.com-854171848.wav"
+dest_files=["res://.godot/imported/Chambering A Round-SoundBible.com-854171848.wav-902b4418fe44607dbaadfa82ad08fa19.sample"]
+
+[params]
+
+force/8_bit=false
+force/mono=false
+force/max_rate=false
+force/max_rate_hz=44100
+edit/trim=false
+edit/normalize=false
+edit/loop_mode=0
+edit/loop_begin=0
+edit/loop_end=-1
+compress/mode=2

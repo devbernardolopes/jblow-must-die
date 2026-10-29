@@ -1,7 +1,10 @@
 [gd_resource type="Resource" script_class="WeaponData" format=3 uid="uid://c3hie3old5k53"]
 
 [ext_resource type="Script" uid="uid://bln4irpuvk00t" path="res://resources/weapon_data.gd" id="1_oj1wo"]
-[ext_resource type="Resource" path="res://resources/projectiles/shotgun_pellet.tres" id="2_pellet"]
+[ext_resource type="AudioStream" uid="uid://bf8c82iba8qix" path="res://assets/sounds/weapons/shotgun/Dry Fire Gun-SoundBible.com-2053652037.wav" id="1_vdcxx"]
+[ext_resource type="Resource" uid="uid://fi8d1hc2sb8n" path="res://resources/projectiles/shotgun_pellet.tres" id="2_pellet"]
+[ext_resource type="AudioStream" uid="uid://1xwo71fkd0vx" path="res://assets/sounds/weapons/shotgun/Chambering A Round-SoundBible.com-854171848.wav" id="3_5u00t"]
+[ext_resource type="AudioStream" uid="uid://bqxi0ajdn6ey6" path="res://assets/sounds/weapons/shotgun/10 Guage Shotgun-SoundBible.com-74120584.wav" id="5_kubt0"]
 
 [resource]
 script = ExtResource("1_oj1wo")
@@ -15,4 +18,7 @@ projectile_count = 8
 spread_degrees = 18.0
 muzzle_offset = Vector2(133, 48)
 attack_action = &"shoot"
+shoot_stream = ExtResource("5_kubt0")
+reload_stream = ExtResource("3_5u00t")
+dry_stream = ExtResource("1_vdcxx")
 metadata/_custom_type_script = "uid://bln4irpuvk00t"
