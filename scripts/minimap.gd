@@ -214,9 +214,20 @@ func _sync_material() -> void:
 	var shader_material := material as ShaderMaterial
 	if shader_material == null:
 		return
-	shader_material.set_shader_parameter(&"rect_size", _map_box())
+	var box: Vector2 = _map_box()
+	shader_material.set_shader_parameter(&"rect_size", box)
 	shader_material.set_shader_parameter(&"map_shape", 1 if shape == Shape.CIRCLE else 0)
 	shader_material.set_shader_parameter(&"corner_radius", corner_radius)
+	if not is_inside_tree():
+		return
+	# The world geometry is submitted with draw_set_transform_matrix(), so its
+	# vertices are not minimap-local by the time the mask shader sees them.
+	# FRAGCOORD is viewport-relative; provide this control's viewport rect for
+	# a clip that works for both transformed world lines and local markers.
+	var canvas_transform: Transform2D = get_global_transform_with_canvas()
+	var canvas_scale: Vector2 = canvas_transform.get_scale().abs()
+	shader_material.set_shader_parameter(&"screen_rect_position", canvas_transform.origin)
+	shader_material.set_shader_parameter(&"screen_rect_size", box * canvas_scale)
 
 
 # --- Geometry sources -----------------------------------------------------

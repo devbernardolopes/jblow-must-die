@@ -147,7 +147,7 @@ speed_multiplier = 3.0
 collision_offset = Vector2(-15, 15)
 current_weapon = ExtResource("10_7iits")
 available_weapons = Array[ExtResource("6_7t5mc")]([ExtResource("7_lakw3"), ExtResource("10_7iits")])
-muzzle = NodePath("@Marker2D@19820")
+muzzle = NodePath("@Marker2D@19821")
 metadata/_custom_type_script = "uid://0yh2bjs84b32"
 
 [node name="PlayerController" type="Node" parent="Entities/Hero" unique_id=385327029]
@@ -277,9 +277,13 @@ text = "9999"
 anchors_preset = 1
 anchor_left = 1.0
 anchor_right = 1.0
-offset_left = -214.8
+offset_left = -244.0
 offset_top = 24.0
 offset_right = -24.0
-offset_bottom = 214.8
+offset_bottom = 244.0
+grow_horizontal = 0
+max_viewport_fraction = 0.7000000000000001
 target = NodePath("../../Entities/Hero")
+line_width_px = 8.0
+wall_color = Color(0.85882354, 0, 0, 1)
 show_other_entities = true

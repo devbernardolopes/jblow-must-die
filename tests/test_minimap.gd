@@ -44,6 +44,7 @@ func _run() -> void:
 	_test_visibility()
 	_test_wall_geometry()
 	_test_source_geometry()
+	_test_mask_shader()
 	await _test_late_source_registration()
 	if _failures == 0:
 		print("Minimap tests: PASS")
@@ -273,6 +274,23 @@ func _test_late_source_registration() -> void:
 
 	wall.free()
 	minimap.free()
+
+
+func _test_mask_shader() -> void:
+	var shader := load("res://shaders/minimap_mask.gdshader") as Shader
+	_assert(shader != null, "minimap mask shader loads")
+	if shader == null:
+		return
+	var uniforms: Array = shader.get_shader_uniform_list()
+	_assert(_has_shader_uniform(uniforms, &"screen_rect_position"), "mask uses screen rectangle position")
+	_assert(_has_shader_uniform(uniforms, &"screen_rect_size"), "mask uses screen rectangle size")
+
+
+func _has_shader_uniform(uniforms: Array, uniform_name: StringName) -> bool:
+	for value: Variant in uniforms:
+		if value is Dictionary and value.get(&"name", StringName()) == uniform_name:
+			return true
+	return false
 
 
 func _make_minimap() -> Minimap:

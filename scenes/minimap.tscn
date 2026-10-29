@@ -6,6 +6,8 @@
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_minimap"]
 shader = ExtResource("2_mask")
 shader_parameter/rect_size = Vector2(220, 220)
+shader_parameter/screen_rect_position = Vector2(0, 0)
+shader_parameter/screen_rect_size = Vector2(220, 220)
 shader_parameter/map_shape = 1
 shader_parameter/corner_radius = 0.0
 
