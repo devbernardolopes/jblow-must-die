@@ -1,12 +1,56 @@
-[gd_resource type="Resource" script_class="ProjectileData" format=3]
+[gd_resource type="Resource" script_class="ProjectileData" format=3 uid="uid://dvih3508vkxi8"]
 
 [ext_resource type="Script" uid="uid://b3scc3g2aif3w" path="res://resources/projectile_data.gd" id="1_data"]
+[ext_resource type="Texture2D" uid="uid://b6gr0btardkd5" path="res://assets/images/projectiles/bullet1.png" id="2_wyuuq"]
+[ext_resource type="Texture2D" uid="uid://dfw81oyienpat" path="res://assets/images/flashes/Impact009Yellow .png" id="3_fynpi"]
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_x7k1d"]
+atlas = ExtResource("3_fynpi")
+region = Rect2(0, 0, 192, 192)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_525xi"]
+atlas = ExtResource("3_fynpi")
+region = Rect2(192, 0, 192, 192)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_xkjkn"]
+atlas = ExtResource("3_fynpi")
+region = Rect2(384, 0, 192, 192)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_fbvbl"]
+atlas = ExtResource("3_fynpi")
+region = Rect2(576, 0, 192, 192)
+
+[sub_resource type="SpriteFrames" id="SpriteFrames_m7uww"]
+animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": ExtResource("2_wyuuq")
+}],
+"loop": 0,
+"name": &"fly",
+"speed": 5.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_x7k1d")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_525xi")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_xkjkn")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_fbvbl")
+}],
+"loop": 0,
+"name": &"impact",
+"speed": 5.0
+}]
 
 [resource]
 script = ExtResource("1_data")
+sprite_frames = Array[SpriteFrames]([SubResource("SpriteFrames_m7uww")])
 animation = &"fly"
-placeholder_color = Color(1, 0.85, 0.35, 1)
-speed = 1600.0
-lifetime = 1.0
-radius = 3.0
+impact_animation = &"impact"
 damage = 10.0

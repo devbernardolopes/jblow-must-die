@@ -1,8 +1,11 @@
 [gd_scene format=3 uid="uid://ct1ts2hqpa3ck"]
 
 [ext_resource type="Texture2D" uid="uid://bueu18hffikko" path="res://assets/images/textures/mtl_g01bluemetal01.png" id="1_4wyf3"]
+[ext_resource type="Texture2D" uid="uid://cy8dcwk74s346" path="res://assets/images/textures/mtl_g01basemetal02.png" id="1_7iits"]
 [ext_resource type="Script" uid="uid://0yh2bjs84b32" path="res://scripts/entity.gd" id="1_rwgxs"]
 [ext_resource type="Resource" uid="uid://bwpv28wrd0ii" path="res://resources/entities/web_developer/web_developer.tres" id="2_4wyf3"]
+[ext_resource type="Shader" uid="uid://cwfgsnx5cb0dy" path="res://shaders/wormhole.gdshader" id="2_oo54l"]
+[ext_resource type="Texture2D" uid="uid://cgla5ete2jbup" path="res://assets/images/decals/oriental_rug.png" id="3_kpybi"]
 [ext_resource type="Script" uid="uid://fpy3d3ekenn8" path="res://scripts/player_controller.gd" id="4_4mrxx"]
 [ext_resource type="Script" uid="uid://cwq11bwr8h2h8" path="res://scripts/wall.gd" id="4_71j4m"]
 [ext_resource type="Resource" uid="uid://7b3w44xgatiu" path="res://resources/entities/zombies/zombie.tres" id="5_e3hyu"]
@@ -12,12 +15,37 @@
 [ext_resource type="Script" uid="uid://bln4irpuvk00t" path="res://resources/weapon_data.gd" id="6_7t5mc"]
 [ext_resource type="Script" uid="uid://cufxcsg1oinft" path="res://scripts/follow_camera.gd" id="6_qfnet"]
 [ext_resource type="Resource" uid="uid://bp0cqsl0kkg3k" path="res://resources/weapons/handgun_weapon.tres" id="7_lakw3"]
-[ext_resource type="Texture2D" uid="uid://cooiv6jdkono4" path="res://assets/images/textures/sld_g01misctrim01.png" id="8_7r4gi"]
 [ext_resource type="Resource" uid="uid://j26o6wdfa204" path="res://resources/weapons/hands_weapon.tres" id="8_pm21f"]
-[ext_resource type="Texture2D" uid="uid://dc8gssllawkb3" path="res://assets/images/textures/Photoreal_Metal_01-512x512.png" id="8_w7kh3"]
 [ext_resource type="Resource" uid="uid://dkgwsb5a2ewhx" path="res://resources/weapons/rifle_weapon.tres" id="9_2lf6f"]
 [ext_resource type="Resource" uid="uid://c3hie3old5k53" path="res://resources/weapons/shotgun_weapon.tres" id="10_7iits"]
 [ext_resource type="Resource" path="res://resources/weapons/knife_weapon.tres" id="11_lakw3"]
+[ext_resource type="Texture2D" uid="uid://dhe54wkpq15r2" path="res://assets/images/textures/mtl_g01metaltrim02.png" id="16_2lf6f"]
+[ext_resource type="Texture2D" uid="uid://d3p2lfsxj7y5c" path="res://assets/images/textures/mtl_g01greymetal05.png" id="17_7iits"]
+[ext_resource type="Texture2D" uid="uid://cmo1ci7owt0q5" path="res://assets/images/textures/mtl_g01rustmetal01.png" id="20_oo54l"]
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_m7uww"]
+shader = ExtResource("2_oo54l")
+shader_parameter/radius = 0.485
+shader_parameter/black_core = 0.19
+shader_parameter/inner_ring = 0.27
+shader_parameter/edge_softness = 0.025
+shader_parameter/rotation_speed = 0.22
+shader_parameter/turbulence_speed = 0.32
+shader_parameter/swirl_strength = 4.2
+shader_parameter/turbulence_scale = 9.0
+shader_parameter/turbulence_amount = 0.62
+shader_parameter/center_color = Color(0.001, 0.005, 0.012, 1)
+shader_parameter/deep_blue = Color(0.005, 0.055, 0.12, 1)
+shader_parameter/blue = Color(0, 0.28, 0.58, 1)
+shader_parameter/bright_blue = Color(0.05, 0.72, 1, 1)
+shader_parameter/cyan = Color(0.25, 0.94, 1, 1)
+shader_parameter/glow_strength = 1.65
+shader_parameter/cloud_brightness = 1.15
+shader_parameter/star_density = 0.12
+shader_parameter/star_brightness = 1.6
+shader_parameter/pulse_strength = 0.055
+shader_parameter/pulse_speed = 1.15
+shader_parameter/activity = 0.0
 
 [sub_resource type="Curve2D" id="Curve2D_q5onr"]
 bake_interval = 8.0
@@ -47,12 +75,12 @@ _data = {
 }
 point_count = 3
 
-[sub_resource type="Curve2D" id="Curve2D_i7141"]
+[sub_resource type="Curve2D" id="Curve2D_oo54l"]
 bake_interval = 8.0
 _data = {
-"points": PackedVector2Array(0, 0, 0, 0, 2272, 6411, 0, 0, 0, 0, 8330, 1663, 0, 0, 0, 0, 21142, 2121, 0, 0, 0, 0, 27081, 2516, 0, 0, 0, 0, 35329, 3160)
+"points": PackedVector2Array(80.40604, 202.31197, -80.40604, -202.31197, -418.09668, -144.4502, -557.6548, -191.93698, 557.6548, 191.93698, 1287.9033, -651.4502, -33.418, -233.926, 33.418, 233.926, 2138.187, 477, 530.51074, -62.65875, -530.51074, 62.65875, 1694.9033, 1398.5498, 0, 0, 0, 0, -363.09668, 1235.5498, 0, 0, 0, 0, -421.09668, 436.5498)
 }
-point_count = 5
+point_count = 6
 
 [sub_resource type="Curve2D" id="Curve2D_o8fc1"]
 bake_interval = 8.0
@@ -61,49 +89,64 @@ _data = {
 }
 point_count = 3
 
+[sub_resource type="Curve2D" id="Curve2D_i7141"]
+bake_interval = 8.0
+_data = {
+"points": PackedVector2Array(0, 0, 0, 0, 2272, 6411, 0, 0, 0, 0, 8330, 1663, 0, 0, 0, 0, 21142, 2121, 0, 0, 0, 0, 27081, 2516, 0, 0, 0, 0, 35329, 3160)
+}
+point_count = 5
+
 [node name="World" type="Node2D" unique_id=1936967746]
 
 [node name="Terrain" type="Node2D" parent="." unique_id=263962426]
 
 [node name="Polygon2D" type="Polygon2D" parent="Terrain" unique_id=438616211]
 texture_repeat = 2
-texture = ExtResource("1_4wyf3")
-texture_scale = Vector2(0.2, 0.2)
+texture = ExtResource("1_7iits")
+texture_scale = Vector2(0.76, 0.76)
 polygon = PackedVector2Array(2261, 6387, 8299, 1649, 23512, 2206, 48934, 4227, 101693, 14469, 110141, 63237, 120637, 129797, 67425, 150888, 747, 146662, 3917, 60262, 10843, 39836)
 metadata/_edit_lock_ = true
 
 [node name="Decals" type="Node2D" parent="." unique_id=2112393720]
+
+[node name="Sprite2D" type="Sprite2D" parent="Decals" unique_id=1179872678]
+material = SubResource("ShaderMaterial_m7uww")
+position = Vector2(7513.8687, 5746.8877)
+scale = Vector2(3.1902363, 3.1902363)
+texture = ExtResource("3_kpybi")
 
 [node name="Objects" type="Node2D" parent="." unique_id=504264520]
 
 [node name="Entities" type="Node2D" parent="." unique_id=1738183308]
 y_sort_enabled = true
 
-[node name="Zombie" type="CharacterBody2D" parent="Entities" unique_id=1722025293]
+[node name="Zombie" type="CharacterBody2D" parent="Entities" unique_id=1722025293 node_paths=PackedStringArray("muzzle")]
 position = Vector2(5671.4707, 6473.126)
 collision_layer = 2
 collision_mask = 7
 motion_mode = 1
 script = ExtResource("1_rwgxs")
 data = ExtResource("5_e3hyu")
-team = &"enemy"
 collision_offset = Vector2(-32, 12)
 current_weapon = ExtResource("8_pm21f")
 available_weapons = Array[ExtResource("6_7t5mc")]([ExtResource("8_pm21f")])
+team = &"enemy"
+muzzle = NodePath("Muzzle")
 metadata/_custom_type_script = "uid://0yh2bjs84b32"
 
-[node name="Hero" type="CharacterBody2D" parent="Entities" unique_id=1469266724]
-position = Vector2(4788, 5873)
+[node name="Hero" type="CharacterBody2D" parent="Entities" unique_id=1469266724 node_paths=PackedStringArray("muzzle")]
+position = Vector2(7992, 5764)
 collision_layer = 2
 collision_mask = 7
 motion_mode = 1
 script = ExtResource("1_rwgxs")
 data = ExtResource("2_4wyf3")
-team = &"player"
 speed_multiplier = 3.0
 collision_offset = Vector2(-11, 13)
-current_weapon = ExtResource("11_lakw3")
+current_weapon = ExtResource("7_lakw3")
 available_weapons = Array[ExtResource("6_7t5mc")]([ExtResource("5_q5onr"), ExtResource("7_lakw3"), ExtResource("9_2lf6f"), ExtResource("10_7iits"), ExtResource("11_lakw3")])
+team = &"player"
+muzzle = NodePath("Muzzle")
 metadata/_custom_type_script = "uid://0yh2bjs84b32"
 
 [node name="PlayerController" type="Node" parent="Entities/Hero" unique_id=385327029]
@@ -123,7 +166,7 @@ height_factor = 0.06
 texture_repeat = 2
 curve = SubResource("Curve2D_q5onr")
 script = ExtResource("4_71j4m")
-texture = ExtResource("8_7r4gi")
+texture = ExtResource("16_2lf6f")
 side_texture = ExtResource("1_4wyf3")
 height_factor = 0.06
 metadata/_custom_type_script = "uid://cwq11bwr8h2h8"
@@ -132,7 +175,7 @@ metadata/_custom_type_script = "uid://cwq11bwr8h2h8"
 texture_repeat = 2
 curve = SubResource("Curve2D_w7kh3")
 script = ExtResource("4_71j4m")
-texture = ExtResource("8_7r4gi")
+texture = ExtResource("16_2lf6f")
 side_texture = ExtResource("1_4wyf3")
 height_factor = 0.06
 metadata/_custom_type_script = "uid://cwq11bwr8h2h8"
@@ -141,7 +184,7 @@ metadata/_custom_type_script = "uid://cwq11bwr8h2h8"
 texture_repeat = 2
 curve = SubResource("Curve2D_e3hyu")
 script = ExtResource("4_71j4m")
-texture = ExtResource("8_7r4gi")
+texture = ExtResource("16_2lf6f")
 side_texture = ExtResource("1_4wyf3")
 height_factor = 0.06
 metadata/_custom_type_script = "uid://cwq11bwr8h2h8"
@@ -150,29 +193,39 @@ metadata/_custom_type_script = "uid://cwq11bwr8h2h8"
 texture_repeat = 2
 curve = SubResource("Curve2D_jhx03")
 script = ExtResource("4_71j4m")
-texture = ExtResource("8_7r4gi")
+texture = ExtResource("16_2lf6f")
 side_texture = ExtResource("1_4wyf3")
 height_factor = 0.06
 metadata/_custom_type_script = "uid://cwq11bwr8h2h8"
 
-[node name="OuterWalls" type="Node2D" parent="Walls" unique_id=75192644]
-
-[node name="Wall" type="Path2D" parent="Walls/OuterWalls" unique_id=608939998]
+[node name="Wall5" type="Path2D" parent="Walls/InnerWalls" unique_id=1645799464]
 texture_repeat = 2
-curve = SubResource("Curve2D_i7141")
+position = Vector2(7188.9995, 5339)
+scale = Vector2(1.0700655, 1)
+curve = SubResource("Curve2D_oo54l")
 script = ExtResource("4_71j4m")
-texture = ExtResource("5_qfnet")
-side_texture = ExtResource("8_w7kh3")
-height_factor = 0.06
+texture = ExtResource("16_2lf6f")
+side_texture = ExtResource("17_7iits")
 metadata/_custom_type_script = "uid://cwq11bwr8h2h8"
-metadata/_edit_lock_ = true
+
+[node name="OuterWalls" type="Node2D" parent="Walls" unique_id=75192644]
 
 [node name="Wall2" type="Path2D" parent="Walls/OuterWalls" unique_id=1891355917]
 texture_repeat = 2
 curve = SubResource("Curve2D_o8fc1")
 script = ExtResource("4_71j4m")
 texture = ExtResource("5_qfnet")
-side_texture = ExtResource("8_w7kh3")
+side_texture = ExtResource("20_oo54l")
+height_factor = 0.06
+metadata/_custom_type_script = "uid://cwq11bwr8h2h8"
+metadata/_edit_lock_ = true
+
+[node name="Wall" type="Path2D" parent="Walls/OuterWalls" unique_id=608939998]
+texture_repeat = 2
+curve = SubResource("Curve2D_i7141")
+script = ExtResource("4_71j4m")
+texture = ExtResource("5_qfnet")
+side_texture = ExtResource("20_oo54l")
 height_factor = 0.06
 metadata/_custom_type_script = "uid://cwq11bwr8h2h8"
 metadata/_edit_lock_ = true
@@ -180,12 +233,13 @@ metadata/_edit_lock_ = true
 [node name="Canopy" type="Node2D" parent="." unique_id=1016076990]
 
 [node name="FollowCamera" type="Camera2D" parent="." unique_id=787066361 node_paths=PackedStringArray("target")]
-position = Vector2(4788, 5873)
+position = Vector2(7992, 5764)
 zoom = Vector2(0.5, 0.5)
 process_callback = 0
 position_smoothing_enabled = true
 position_smoothing_speed = 28.0
 script = ExtResource("6_qfnet")
 target = NodePath("../Entities/Hero")
+auto_zoom_response = 1.0
 metadata/_custom_type_script = "uid://cufxcsg1oinft"
 metadata/_edit_lock_ = true

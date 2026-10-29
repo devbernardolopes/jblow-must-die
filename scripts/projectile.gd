@@ -103,6 +103,7 @@ func _configure_shape(shape_node: CollisionShape2D) -> void:
 		circle = CircleShape2D.new()
 		shape_node.shape = circle
 	circle.radius = maxf(data.radius, 1.0)
+	shape_node.debug_color = Color(1.0, 0.0, 0.0)
 
 func _configure_sprite() -> void:
 	if data.sprite_frames.is_empty():
@@ -117,6 +118,7 @@ func _configure_sprite() -> void:
 	var animation: StringName = data.animation
 	if not frames.has_animation(animation):
 		animation = StringName(frames.get_animation_names()[0])
+	sprite.scale = Vector2.ONE * data.scale_adjustment
 	sprite.play(animation)
 
 func _on_hitbox_body_entered(body: Node2D) -> void:
@@ -156,6 +158,7 @@ func _die() -> void:
 		return
 
 	sprite.play(impact)
+	sprite.top_level = true
 	var duration: float = _animation_duration(impact)
 	if duration <= 0.0:
 		queue_free()
