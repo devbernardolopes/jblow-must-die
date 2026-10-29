@@ -1,0 +1,14 @@
+[gd_scene format=3 uid="uid://bs8k0ghk6xfn1"]
+
+[ext_resource type="Script" uid="uid://cgbil53mmbx0p" path="res://scripts/projectile.gd" id="1_c8fcr"]
+
+[node name="Projectile" type="CharacterBody2D" unique_id=1105275104]
+script = ExtResource("1_c8fcr")
+
+[node name="Sprite" type="AnimatedSprite2D" parent="." unique_id=2004555292]
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=1912163472]
+
+[node name="Hitbox" type="Area2D" parent="." unique_id=1824869740]
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Hitbox" unique_id=1481888697]

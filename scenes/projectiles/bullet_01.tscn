@@ -1,0 +1,7 @@
+[gd_scene format=3 uid="uid://do8sy470a6dju"]
+
+[ext_resource type="Script" uid="uid://cgbil53mmbx0p" path="res://scripts/projectile.gd" id="1_y77a2"]
+
+[node name="Bullet01" type="CharacterBody2D" unique_id=1087863998]
+script = ExtResource("1_y77a2")
+metadata/_custom_type_script = "uid://cgbil53mmbx0p"

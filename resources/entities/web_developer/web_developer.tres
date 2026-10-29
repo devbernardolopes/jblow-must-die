@@ -1,0 +1,9 @@
+[gd_resource type="Resource" script_class="EntityData" format=3 uid="uid://bwpv28wrd0ii"]
+
+[ext_resource type="Resource" uid="uid://dpyp5y5u7c475" path="res://resources/entities/web_developer/web_developer_animation_set_handgun.tres" id="1_60ceu"]
+[ext_resource type="Script" uid="uid://b0heyc47lb5h3" path="res://resources/entity_data.gd" id="1_iqehh"]
+
+[resource]
+script = ExtResource("1_iqehh")
+animation_set = Array[Object]([ExtResource("1_60ceu")])
+metadata/_custom_type_script = "uid://b0heyc47lb5h3"

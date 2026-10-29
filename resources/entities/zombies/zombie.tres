@@ -1,0 +1,10 @@
+[gd_resource type="Resource" script_class="EntityData" format=3 uid="uid://7b3w44xgatiu"]
+
+[ext_resource type="Script" uid="uid://bo74pbkpstasp" path="res://resources/entity_animation_set.gd" id="1_vbpvn"]
+[ext_resource type="Resource" uid="uid://dj3ddadnkmh4g" path="res://resources/entities/zombies/zombie_animation_set_02.tres" id="2_2pid6"]
+[ext_resource type="Script" uid="uid://b0heyc47lb5h3" path="res://resources/entity_data.gd" id="3_acfp8"]
+
+[resource]
+script = ExtResource("3_acfp8")
+animation_set = Array[ExtResource("1_vbpvn")]([ExtResource("2_2pid6")])
+metadata/_custom_type_script = "uid://b0heyc47lb5h3"

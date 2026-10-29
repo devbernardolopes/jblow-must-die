@@ -1,0 +1,177 @@
+[gd_scene format=3 uid="uid://ct1ts2hqpa3ck"]
+
+[ext_resource type="Texture2D" uid="uid://bueu18hffikko" path="res://assets/images/textures/mtl_g01bluemetal01.png" id="1_4wyf3"]
+[ext_resource type="Script" uid="uid://0yh2bjs84b32" path="res://scripts/entity.gd" id="1_rwgxs"]
+[ext_resource type="Resource" uid="uid://bwpv28wrd0ii" path="res://resources/entities/web_developer/web_developer.tres" id="2_4wyf3"]
+[ext_resource type="Script" uid="uid://fpy3d3ekenn8" path="res://scripts/player_controller.gd" id="4_4mrxx"]
+[ext_resource type="Script" uid="uid://cwq11bwr8h2h8" path="res://scripts/wall.gd" id="4_71j4m"]
+[ext_resource type="Resource" uid="uid://7b3w44xgatiu" path="res://resources/entities/zombies/zombie.tres" id="5_e3hyu"]
+[ext_resource type="Texture2D" uid="uid://cob4ubhuebdyg" path="res://assets/images/textures/mtl_g01metaltrim02b.png" id="5_qfnet"]
+[ext_resource type="Script" uid="uid://cg1uto20g3kh3" path="res://scripts/walls_helper.gd" id="5_w7kh3"]
+[ext_resource type="Script" uid="uid://cufxcsg1oinft" path="res://scripts/follow_camera.gd" id="6_qfnet"]
+[ext_resource type="Texture2D" uid="uid://cooiv6jdkono4" path="res://assets/images/textures/sld_g01misctrim01.png" id="8_7r4gi"]
+[ext_resource type="Texture2D" uid="uid://dc8gssllawkb3" path="res://assets/images/textures/Photoreal_Metal_01-512x512.png" id="8_w7kh3"]
+
+[sub_resource type="Curve2D" id="Curve2D_q5onr"]
+bake_interval = 8.0
+_data = {
+"points": PackedVector2Array(0, 0, 0, 0, 3148, 7175, 0, 0, 0, 0, 4304, 9186, 0, 0, 0, 0, 5908, 9120, 0, 0, 0, 0, 7430, 8429, 0, 0, 0, 0, 8008, 8917, 0, 0, 0, 0, 10540, 8681, 0, 0, 0, 0, 11573, 6475, 0, 0, 0, 0, 10213, 5235)
+}
+point_count = 8
+
+[sub_resource type="Curve2D" id="Curve2D_w7kh3"]
+bake_interval = 8.0
+_data = {
+"points": PackedVector2Array(0, 0, 0, 0, 3052, 5877, 0, 0, 0, 0, 3952, 6956, 0, 0, 0, 0, 5081, 6682, 0, 0, 0, 0, 5663, 7020)
+}
+point_count = 4
+
+[sub_resource type="Curve2D" id="Curve2D_e3hyu"]
+bake_interval = 8.0
+_data = {
+"points": PackedVector2Array(0, 0, 0, 0, 4487, 4737, 0, 0, 0, 0, 5460, 5326, 0, 0, 0, 0, 6185, 6377)
+}
+point_count = 3
+
+[sub_resource type="Curve2D" id="Curve2D_jhx03"]
+bake_interval = 8.0
+_data = {
+"points": PackedVector2Array(0, 0, 0, 0, 13899, 1899, 0, 0, 0, 0, 12204, 5513, 0, 0, 0, 0, 10480, 4709)
+}
+point_count = 3
+
+[sub_resource type="Curve2D" id="Curve2D_i7141"]
+bake_interval = 8.0
+_data = {
+"points": PackedVector2Array(0, 0, 0, 0, 2272, 6411, 0, 0, 0, 0, 8330, 1663, 0, 0, 0, 0, 21142, 2121, 0, 0, 0, 0, 27081, 2516, 0, 0, 0, 0, 35329, 3160)
+}
+point_count = 5
+
+[sub_resource type="Curve2D" id="Curve2D_o8fc1"]
+bake_interval = 8.0
+_data = {
+"points": PackedVector2Array(0, 0, 0, 0, 2299, 6348, 0, 0, 0, 0, 3442, 10943, 0, 0, 0, 0, 4167, 13669)
+}
+point_count = 3
+
+[node name="World" type="Node2D" unique_id=1936967746]
+
+[node name="Terrain" type="Node2D" parent="." unique_id=263962426]
+
+[node name="Polygon2D" type="Polygon2D" parent="Terrain" unique_id=438616211]
+texture_repeat = 2
+texture = ExtResource("1_4wyf3")
+texture_scale = Vector2(0.2, 0.2)
+polygon = PackedVector2Array(2261, 6387, 8299, 1649, 23512, 2206, 48934, 4227, 101693, 14469, 110141, 63237, 120637, 129797, 67425, 150888, 747, 146662, 3917, 60262, 10843, 39836)
+metadata/_edit_lock_ = true
+
+[node name="Decals" type="Node2D" parent="." unique_id=2112393720]
+
+[node name="Objects" type="Node2D" parent="." unique_id=504264520]
+
+[node name="Entities" type="Node2D" parent="." unique_id=1738183308]
+y_sort_enabled = true
+
+[node name="Zombie" type="CharacterBody2D" parent="Entities" unique_id=1722025293]
+position = Vector2(5671.4707, 6473.126)
+collision_layer = 2
+collision_mask = 7
+motion_mode = 1
+script = ExtResource("1_rwgxs")
+data = ExtResource("5_e3hyu")
+collision_offset = Vector2(-32, 12)
+metadata/_custom_type_script = "uid://0yh2bjs84b32"
+
+[node name="Hero" type="CharacterBody2D" parent="Entities" unique_id=1469266724]
+position = Vector2(4788, 5873)
+collision_layer = 2
+collision_mask = 7
+motion_mode = 1
+script = ExtResource("1_rwgxs")
+data = ExtResource("2_4wyf3")
+current_animation = &"move"
+speed_multiplier = 3.0
+collision_offset = Vector2(-11, 13)
+metadata/_custom_type_script = "uid://0yh2bjs84b32"
+
+[node name="PlayerController" type="Node" parent="Entities/Hero" unique_id=385327029]
+script = ExtResource("4_4mrxx")
+movement_mode = 1
+metadata/_custom_type_script = "uid://fpy3d3ekenn8"
+
+[node name="Walls" type="Node2D" parent="." unique_id=1513112567]
+script = ExtResource("5_w7kh3")
+height_factor = 0.06
+
+[node name="InnerWalls" type="Node2D" parent="Walls" unique_id=59919917]
+
+[node name="Wall" type="Path2D" parent="Walls/InnerWalls" unique_id=1690581242]
+texture_repeat = 2
+curve = SubResource("Curve2D_q5onr")
+script = ExtResource("4_71j4m")
+texture = ExtResource("8_7r4gi")
+side_texture = ExtResource("1_4wyf3")
+height_factor = 0.06
+metadata/_custom_type_script = "uid://cwq11bwr8h2h8"
+
+[node name="Wall2" type="Path2D" parent="Walls/InnerWalls" unique_id=213605668]
+texture_repeat = 2
+curve = SubResource("Curve2D_w7kh3")
+script = ExtResource("4_71j4m")
+texture = ExtResource("8_7r4gi")
+side_texture = ExtResource("1_4wyf3")
+height_factor = 0.06
+metadata/_custom_type_script = "uid://cwq11bwr8h2h8"
+
+[node name="Wall3" type="Path2D" parent="Walls/InnerWalls" unique_id=1285585156]
+texture_repeat = 2
+curve = SubResource("Curve2D_e3hyu")
+script = ExtResource("4_71j4m")
+texture = ExtResource("8_7r4gi")
+side_texture = ExtResource("1_4wyf3")
+height_factor = 0.06
+metadata/_custom_type_script = "uid://cwq11bwr8h2h8"
+
+[node name="Wall4" type="Path2D" parent="Walls/InnerWalls" unique_id=1884688308]
+texture_repeat = 2
+curve = SubResource("Curve2D_jhx03")
+script = ExtResource("4_71j4m")
+texture = ExtResource("8_7r4gi")
+side_texture = ExtResource("1_4wyf3")
+height_factor = 0.06
+metadata/_custom_type_script = "uid://cwq11bwr8h2h8"
+
+[node name="OuterWalls" type="Node2D" parent="Walls" unique_id=75192644]
+
+[node name="Wall" type="Path2D" parent="Walls/OuterWalls" unique_id=608939998]
+texture_repeat = 2
+curve = SubResource("Curve2D_i7141")
+script = ExtResource("4_71j4m")
+texture = ExtResource("5_qfnet")
+side_texture = ExtResource("8_w7kh3")
+height_factor = 0.06
+metadata/_custom_type_script = "uid://cwq11bwr8h2h8"
+metadata/_edit_lock_ = true
+
+[node name="Wall2" type="Path2D" parent="Walls/OuterWalls" unique_id=1891355917]
+texture_repeat = 2
+curve = SubResource("Curve2D_o8fc1")
+script = ExtResource("4_71j4m")
+texture = ExtResource("5_qfnet")
+side_texture = ExtResource("8_w7kh3")
+height_factor = 0.06
+metadata/_custom_type_script = "uid://cwq11bwr8h2h8"
+metadata/_edit_lock_ = true
+
+[node name="Canopy" type="Node2D" parent="." unique_id=1016076990]
+
+[node name="FollowCamera" type="Camera2D" parent="." unique_id=787066361 node_paths=PackedStringArray("target")]
+position = Vector2(4788, 5873)
+zoom = Vector2(0.5, 0.5)
+process_callback = 0
+position_smoothing_enabled = true
+position_smoothing_speed = 28.0
+script = ExtResource("6_qfnet")
+target = NodePath("../Entities/Hero")
+metadata/_custom_type_script = "uid://cufxcsg1oinft"
+metadata/_edit_lock_ = true
