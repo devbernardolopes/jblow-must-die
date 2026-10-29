@@ -19,6 +19,3 @@ extends Resource
 
 @export_category("Sounds")
 @export var sound_set: EntitySoundSet = null
-
-@export_category("Controls")
-#@export var controller: EntityController = null

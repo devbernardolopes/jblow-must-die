@@ -1,0 +1,10 @@
+[gd_resource type="Resource" script_class="WeaponData" format=3 uid="uid://dcgqgimnkh3ng"]
+
+[ext_resource type="Script" uid="uid://bln4irpuvk00t" path="res://resources/weapon_data.gd" id="1_wnrdq"]
+
+[resource]
+script = ExtResource("1_wnrdq")
+name = &"flashlight"
+base_damage = 4.0
+cooldown_period = 0.7
+metadata/_custom_type_script = "uid://bln4irpuvk00t"

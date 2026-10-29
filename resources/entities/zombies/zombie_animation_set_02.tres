@@ -187,7 +187,7 @@ animations = [{
 "duration": 1.0,
 "texture": ExtResource("44_p3bix")
 }],
-"loop": 1,
+"loop": 0,
 "name": &"move",
 "speed": 24.0
 }]

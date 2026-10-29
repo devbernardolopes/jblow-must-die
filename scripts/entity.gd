@@ -37,6 +37,8 @@ signal push_rejected(target: Node, required_strength: int)
 		collision_offset = v
 		_configure_collision_shape()
 
+@export var current_weapon: WeaponData = null
+
 var visual: AnimatedSprite2D = null
 var collision: CollisionShape2D = null
 var interaction: Area2D = null

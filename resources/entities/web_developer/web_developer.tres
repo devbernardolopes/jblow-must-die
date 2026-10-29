@@ -2,8 +2,11 @@
 
 [ext_resource type="Resource" uid="uid://dpyp5y5u7c475" path="res://resources/entities/web_developer/web_developer_animation_set_handgun.tres" id="1_60ceu"]
 [ext_resource type="Script" uid="uid://b0heyc47lb5h3" path="res://resources/entity_data.gd" id="1_iqehh"]
+[ext_resource type="Script" uid="uid://bo74pbkpstasp" path="res://resources/entity_animation_set.gd" id="1_td37t"]
+[ext_resource type="Resource" uid="uid://c5icj4xvmh5qa" path="res://resources/entities/web_developer/web_developer_animation_set_flashlight.tres" id="3_bedte"]
+[ext_resource type="Resource" uid="uid://dnxk4uchjtxnb" path="res://resources/entities/web_developer/web_developer_animation_set_knife.tres" id="4_bedte"]
 
 [resource]
 script = ExtResource("1_iqehh")
-animation_set = Array[Object]([ExtResource("1_60ceu")])
+animation_set = Array[ExtResource("1_td37t")]([ExtResource("1_60ceu"), ExtResource("3_bedte"), ExtResource("4_bedte")])
 metadata/_custom_type_script = "uid://b0heyc47lb5h3"

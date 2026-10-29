@@ -1,0 +1,10 @@
+[gd_resource type="Resource" script_class="WeaponData" format=3 uid="uid://j26o6wdfa204"]
+
+[ext_resource type="Script" uid="uid://bln4irpuvk00t" path="res://resources/weapon_data.gd" id="1_di6bf"]
+
+[resource]
+script = ExtResource("1_di6bf")
+name = &"hands"
+base_damage = 2.0
+cooldown_period = 0.75
+metadata/_custom_type_script = "uid://bln4irpuvk00t"

@@ -6,6 +6,7 @@
 [ext_resource type="Script" uid="uid://fpy3d3ekenn8" path="res://scripts/player_controller.gd" id="4_4mrxx"]
 [ext_resource type="Script" uid="uid://cwq11bwr8h2h8" path="res://scripts/wall.gd" id="4_71j4m"]
 [ext_resource type="Resource" uid="uid://7b3w44xgatiu" path="res://resources/entities/zombies/zombie.tres" id="5_e3hyu"]
+[ext_resource type="Resource" uid="uid://bp0cqsl0kkg3k" path="res://resources/weapons/handgun_weapon.tres" id="5_q5onr"]
 [ext_resource type="Texture2D" uid="uid://cob4ubhuebdyg" path="res://assets/images/textures/mtl_g01metaltrim02b.png" id="5_qfnet"]
 [ext_resource type="Script" uid="uid://cg1uto20g3kh3" path="res://scripts/walls_helper.gd" id="5_w7kh3"]
 [ext_resource type="Script" uid="uid://cufxcsg1oinft" path="res://scripts/follow_camera.gd" id="6_qfnet"]
@@ -89,9 +90,9 @@ collision_mask = 7
 motion_mode = 1
 script = ExtResource("1_rwgxs")
 data = ExtResource("2_4wyf3")
-current_animation = &"move"
 speed_multiplier = 3.0
 collision_offset = Vector2(-11, 13)
+current_weapon = ExtResource("5_q5onr")
 metadata/_custom_type_script = "uid://0yh2bjs84b32"
 
 [node name="PlayerController" type="Node" parent="Entities/Hero" unique_id=385327029]
