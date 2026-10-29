@@ -69,6 +69,7 @@ var _viewer: Node2D
 var _last_viewer := Vector2(NAN, NAN)  # local space; NAN = needs refresh, INF = no viewer
 
 func _ready() -> void:
+	add_to_group(&"minimap_source")
 	line = Line2D.new()
 	line.name = "Line"
 	add_child(line, false, Node.INTERNAL_MODE_FRONT)
@@ -119,6 +120,26 @@ func _rebuild() -> void:
 	_rebuild_collision()
 	_invalidate_height()
 	_rebuilding = false
+
+## Centerline in global pixels, used by the minimap. This is the authored
+## geometry, not the height-shifted visual.
+func get_minimap_geometry() -> Array[MinimapGeometry]:
+	var result: Array[MinimapGeometry] = []
+	if curve == null:
+		return result
+	var local_points: PackedVector2Array = curve.get_baked_points()
+	if local_points.size() < 2:
+		return result
+	var global_points := PackedVector2Array()
+	global_points.resize(local_points.size())
+	for index: int in range(local_points.size()):
+		global_points[index] = global_transform * local_points[index]
+	var geometry := MinimapGeometry.new()
+	geometry.kind = MinimapGeometry.Kind.WALL
+	geometry.closed = local_points[0].distance_to(local_points[local_points.size() - 1]) < 0.01
+	geometry.points = global_points
+	result.append(geometry)
+	return result
 
 # --- Footprint outline (shared by collision and side faces) ---
 

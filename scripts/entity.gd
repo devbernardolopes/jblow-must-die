@@ -292,13 +292,19 @@ func _refill_ammo(weapon: WeaponData) -> void:
 
 ## Hook for spawning the weapon's projectile or hit effect.
 func _fire() -> void:
+	push_warning("'fire'")
+	
 	if current_weapon == null or not current_weapon.can_shoot():
 		return
-	if is_out_of_ammo(current_weapon):
-		return
+
 	if muzzle == null:
 		_ensure_visual()
 	var origin: Vector2 = muzzle.global_position
+
+	if is_out_of_ammo(current_weapon):
+		if current_weapon.dry_stream:
+			AudioManager.play_at(origin / Units.PX_PER_METER, current_weapon.dry_stream)
+		return
 	var forward: Vector2 = muzzle.global_transform.x.normalized()
 	if forward.is_zero_approx():
 		forward = facing
@@ -315,8 +321,10 @@ func _fire() -> void:
 		Projectile.spawn(current_weapon.projectile, origin, direction, self, pellet_damage)
 
 func _on_animator_action_triggered(action_id: StringName) -> void:
+	push_warning("action_triggered.emit == %s" % action_id)
 	action_triggered.emit(action_id)
 	if current_weapon == null:
+		push_warning("current_weapon == null")
 		return
 	if action_id == current_weapon.attack_action:
 		_fire()

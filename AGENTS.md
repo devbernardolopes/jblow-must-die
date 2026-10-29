@@ -34,6 +34,18 @@ This game is currently being developed and it is in very early stages. No one is
 - Weapon switching is ignored while an action is busy. Cooldowns are keyed by weapon and action, so swapping cannot reset them.
 - Ammo is per entity, keyed by `WeaponData.name`. `base_damage` is per shot and is divided across `projectile_count`; reload refills when the reload action reaches its `trigger_frame`.
 
+## Minimap Authoring
+
+- The minimap lives in `scenes/minimap.tscn` and is instanced under `Hud` in `scenes/world.tscn`. `Hud.target` feeds it the centred player.
+- It is an immediate-mode `Control`: one `_draw()` with `draw_set_transform_matrix()`, no SubViewport or second camera. Do not add per-frame point math to keep the player centred; the transform does that.
+- Anything on the map joins the `minimap_source` group and implements `get_minimap_geometry() -> Array[MinimapGeometry]`, returning shapes in **global world pixels**. `Wall` does this from its `Curve2D` centerline; `MinimapSource` does it for authored doors, areas and points of interest.
+- Add a new map feature by adding a `MinimapGeometry.Kind`, a default color export on `Minimap`, and a source that emits it. Do not special-case drawing per node type.
+- `MinimapSource` points are local to the node, so the shape follows its parent transform. Call `notify_minimap_changed()` after mutating points at runtime.
+- Fog of war is the `MinimapVisibility` resource assigned to `Minimap.visibility`; `null` reveals everything. `is_explored` is persistent (walls and areas stay revealed), `is_visible_now` is transient (other entities only show while in view). Implement fog by subclassing it, not by editing the renderer.
+- `Minimap.Corner` had to be named `MapCorner`: Godot 4.7 has a global `Corner` type that shadows a local enum of the same name and breaks parsing.
+- Circular/rounded clipping is `shaders/minimap_mask.gdshader`. It captures `VERTEX` in `vertex()` because `VERTEX`/`FRAGCOORD` are screen space in `fragment()` and break under canvas stretch.
+- Headless mode cannot compile the shader; verify it by loading the `Shader` and reading `get_shader_uniform_list()`.
+
 ## Testing
 
 All **gameplay** testing is manual by the human after every iteration: do not run the main game scene.
@@ -54,6 +66,7 @@ godot --headless --path . --script res://tests/test_animation_resources.gd
 godot --headless --path . --script res://tests/test_entity_animation_integration.gd
 godot --headless --path . --script res://tests/test_weapon_system.gd
 godot --headless --path . --script res://tests/test_projectiles.gd
+godot --headless --path . --script res://tests/test_minimap.gd
 ```
 
 `--import` must report no errors before the tests; the resource test also validates authored `.tres` animation sets, so extend it when adding a set or weapon.

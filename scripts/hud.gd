@@ -21,6 +21,9 @@ const INFO_FONT_SCALE: float = 0.8
 @onready var ammo_count: Label = $HBoxContainer/AmmoCount
 
 func _ready() -> void:
+	var minimap_node := get_node_or_null(^"Minimap") as Minimap
+	if minimap_node != null:
+		minimap_node.target = target
 	var labels = find_children("*")
 	if labels and not labels.is_empty():
 		for i in labels.size():
@@ -42,7 +45,7 @@ func _process(_delta: float) -> void:
 		return
 	if ammo_count:
 		ammo_count.text = "0"
-		ammo_count.text = "%d" % target.get_ammo(target.current_weapon)
+		ammo_count.text = "%d" % target.get_ammo(target.current_weapon) # TODO: VERY IMPORTANT! Change this to subscribe to some signal or something so it updates in real time
 
 func _update_font_size() -> void:
 	var viewport_height: float = get_viewport().get_visible_rect().size.y

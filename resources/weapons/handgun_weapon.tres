@@ -1,7 +1,10 @@
 [gd_resource type="Resource" script_class="WeaponData" format=3 uid="uid://bp0cqsl0kkg3k"]
 
+[ext_resource type="AudioStream" uid="uid://bf8c82iba8qix" path="res://assets/sounds/weapons/shotgun/Dry Fire Gun-SoundBible.com-2053652037.wav" id="1_8r06n"]
 [ext_resource type="Script" uid="uid://bln4irpuvk00t" path="res://resources/weapon_data.gd" id="1_yn5nt"]
 [ext_resource type="Resource" uid="uid://dvih3508vkxi8" path="res://resources/projectiles/handgun_bullet.tres" id="2_bullet"]
+[ext_resource type="AudioStream" uid="uid://8a6tfk6akmlv" path="res://assets/sounds/weapons/handgun/gunreload1.wav" id="3_wwuof"]
+[ext_resource type="AudioStream" uid="uid://dg3sc6fil3jgc" path="res://assets/sounds/weapons/handgun/pistol.wav" id="5_0wjqe"]
 
 [resource]
 script = ExtResource("1_yn5nt")
@@ -13,4 +16,7 @@ ammo_amount = 1000
 projectile = ExtResource("2_bullet")
 muzzle_offset = Vector2(128, 58)
 attack_action = &"shoot"
+shoot_stream = ExtResource("5_0wjqe")
+reload_stream = ExtResource("3_wwuof")
+dry_stream = ExtResource("1_8r06n")
 metadata/_custom_type_script = "uid://bln4irpuvk00t"

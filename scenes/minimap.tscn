@@ -1,0 +1,20 @@
+[gd_scene load_steps=4 format=3]
+
+[ext_resource type="Script" uid="uid://b1nqmh8x3txoq" path="res://scripts/minimap.gd" id="1_minimap"]
+[ext_resource type="Shader" path="res://shaders/minimap_mask.gdshader" id="2_mask"]
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_minimap"]
+shader = ExtResource("2_mask")
+shader_parameter/rect_size = Vector2(220, 220)
+shader_parameter/map_shape = 1
+shader_parameter/corner_radius = 0.0
+
+[node name="Minimap" type="Control"]
+layout_mode = 3
+anchors_preset = 0
+offset_right = 220.0
+offset_bottom = 220.0
+mouse_filter = 2
+clip_contents = true
+material = SubResource("ShaderMaterial_minimap")
+script = ExtResource("1_minimap")
