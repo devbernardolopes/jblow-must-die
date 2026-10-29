@@ -44,6 +44,7 @@
 [ext_resource type="Texture2D" uid="uid://cg6oa1ma1nivu" path="res://assets/images/entities/zombie_02/skeleton-move_14.png" id="42_po085"]
 [ext_resource type="Texture2D" uid="uid://bm4reqtmlpngt" path="res://assets/images/entities/zombie_02/skeleton-move_15.png" id="43_f3f5s"]
 [ext_resource type="Texture2D" uid="uid://dopk5wspiopdb" path="res://assets/images/entities/zombie_02/skeleton-move_16.png" id="44_p3bix"]
+[ext_resource type="Script" uid="uid://dic86sdkuohg5" path="res://resources/entity_animation_action.gd" id="99_action"]
 
 [sub_resource type="SpriteFrames" id="SpriteFrames_ps636"]
 animations = [{
@@ -187,13 +188,20 @@ animations = [{
 "duration": 1.0,
 "texture": ExtResource("44_p3bix")
 }],
-"loop": 0,
+"loop": 1,
 "name": &"move",
 "speed": 24.0
 }]
 
+[sub_resource type="Resource" id="Resource_attack"]
+script = ExtResource("99_action")
+id = &"attack"
+animation = &"attack"
+trigger_frame = 4
+
 [resource]
 script = ExtResource("1_rr1ec")
-name = "main"
+id = &"main"
 sprite_frames = SubResource("SpriteFrames_ps636")
+actions = Array[ExtResource("99_action")]([SubResource("Resource_attack")])
 metadata/_custom_type_script = "uid://bo74pbkpstasp"

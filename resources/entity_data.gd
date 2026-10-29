@@ -1,3 +1,4 @@
+@tool
 class_name EntityData
 extends Resource
 
@@ -13,9 +14,15 @@ extends Resource
 @export_range(0.00, 30.00) var charisma: int = 10
 
 @export_category("Visuals")
-@export var animation_set: Array[EntityAnimationSet] = []:
-	set(v):
-		animation_set = v
+@export var animation_sets: Array[EntityAnimationSet] = []
+## Set used when no weapon set matches, for example on CPU-only entities.
+@export var default_animation_set_id: StringName = &"default"
 
 @export_category("Sounds")
 @export var sound_set: EntitySoundSet = null
+
+func get_animation_set(set_id: StringName) -> EntityAnimationSet:
+	for candidate: EntityAnimationSet in animation_sets:
+		if candidate != null and candidate.id == set_id:
+			return candidate
+	return null

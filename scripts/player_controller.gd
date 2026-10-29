@@ -2,6 +2,8 @@ class_name PlayerController
 extends EntityController
 ## Reads the shared movement actions, so keyboard, gamepad, and touch all work.
 
+@onready var _entity: Entity = get_parent() as Entity
+
 func get_move_vector() -> Vector2:
 	return Input.get_vector("move_left", "move_right", "move_up", "move_down")
 
@@ -13,5 +15,23 @@ func get_move_intent() -> Vector2:
 func wants_run() -> bool:
 	return Input.is_action_pressed("run")
 
-func wants_attack() -> bool:
-	return Input.is_action_just_pressed("action_02")
+func get_action_request() -> StringName:
+	if Input.is_action_just_pressed("reload"):
+		return _reload_action()
+	if Input.is_action_just_pressed("action_02"):
+		return _attack_action()
+	if Input.is_action_just_pressed("action_01"):
+		return &"melee_attack"
+	return &""
+
+func _attack_action() -> StringName:
+	if _entity == null or _entity.current_weapon == null:
+		return &"melee_attack"
+	return _entity.current_weapon.attack_action
+
+func _reload_action() -> StringName:
+	if _entity == null or _entity.current_weapon == null:
+		return &""
+	if not _entity.current_weapon.can_reload():
+		return &""
+	return _entity.current_weapon.reload_action

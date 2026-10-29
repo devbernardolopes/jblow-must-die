@@ -18,6 +18,19 @@ This game is currently being developed and it is in very early stages. No one is
 - No commented-out dead code (git keeps history).
 - Don't choose names for local variables that will shadow anything else (properties, methods, etc). Prefix with underscore if needed.
 
+## Animation Authoring
+
+- Visuals are data-driven through `EntityAnimationSet` resources. A set has a stable `id`, one `SpriteFrames`, and the `idle`/`move` animation names.
+- A set is selected by matching `WeaponData.name` against `EntityAnimationSet.id`. Entities without a weapon use `EntityData.default_animation_set_id`. A weapon with no matching set intentionally resolves to no set and logs a warning; do not silently fall back to another weapon's set.
+- `EntityAnimator` is the only animation state machine, and it has exactly three states: `IDLE`, `MOVE`, `ACTION`. Do not add more states for individual attacks; those are one-shot actions.
+- Every animation in the set that is not `idle`/`move` is auto-registered as an action under its own name. Add an `EntityAnimationAction` only when the defaults need changing: `id`, `animation`, `locks_movement`, `priority`, `trigger_frame`.
+- Actions lock movement by default. Set `locks_movement = false` only for actions that should allow locomotion.
+- `trigger_frame` is when gameplay happens (shots, hits, sounds). Keep timing in the animation resource and handle it in `Entity.action_triggered` instead of in controllers.
+- `idle` and `move` must loop (`loop = 1`); action animations must not loop.
+- Controllers never drive animations directly. They return an action id from `get_action_request()`; `Entity.try_action()` handles cooldown gating and the animator handles playback.
+- `WeaponData.attack_action` and `reload_action` name the actions in the equipped set (handgun: `shoot`, `reload`; melee: `melee_attack`).
+- Resource scripts referenced by the `@tool` `Entity` (for example `EntityData`) must also be `@tool`, otherwise the editor loads a placeholder instance and method calls fail.
+
 ## Testing
 
 All **gameplay** testing is manual by the human after every iteration: do not run the main game scene.
@@ -27,6 +40,18 @@ The testing devices is:
 
 Agents must validate scripts without running gameplay. Use the headless harness.
 Never ship a script with parse or compile errors.
+
+Headless validation commands:
+
+```sh
+godot --headless --path . --import
+godot --headless --path . --check-only --script res://scripts/entity_animator.gd
+godot --headless --path . --script res://tests/test_entity_animator.gd
+godot --headless --path . --script res://tests/test_animation_resources.gd
+godot --headless --path . --script res://tests/test_entity_animation_integration.gd
+```
+
+`--import` must report no errors before the tests; the resource test also validates authored `.tres` animation sets, so extend it when adding a set or weapon.
 
 ## Agent Workflow Notes (learned the hard way — keep current)
 

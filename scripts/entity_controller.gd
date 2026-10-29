@@ -1,6 +1,6 @@
 class_name EntityController
 extends Node
-## Base class for entity behavior. Subclasses provide movement intent only.
+## Base class for entity behavior. Subclasses provide movement intent and action requests.
 
 enum MovementMode {
 	OMNI,
@@ -21,6 +21,7 @@ func get_move_intent() -> Vector2:
 
 func wants_run() -> bool:
 	return false
-	
-func wants_attack() -> bool:
-	return false
+
+## Action id to try this frame, or &"" for none.
+func get_action_request() -> StringName:
+	return &""

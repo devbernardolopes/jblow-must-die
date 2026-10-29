@@ -8,5 +8,6 @@
 
 [resource]
 script = ExtResource("1_iqehh")
-animation_set = Array[ExtResource("1_td37t")]([ExtResource("1_60ceu"), ExtResource("3_bedte"), ExtResource("4_bedte")])
+animation_sets = Array[ExtResource("1_td37t")]([ExtResource("1_60ceu"), ExtResource("3_bedte"), ExtResource("4_bedte")])
+default_animation_set_id = &"handgun"
 metadata/_custom_type_script = "uid://b0heyc47lb5h3"

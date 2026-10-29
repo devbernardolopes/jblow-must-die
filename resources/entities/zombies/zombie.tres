@@ -6,5 +6,6 @@
 
 [resource]
 script = ExtResource("3_acfp8")
-animation_set = Array[ExtResource("1_vbpvn")]([ExtResource("2_2pid6")])
+animation_sets = Array[ExtResource("1_vbpvn")]([ExtResource("2_2pid6")])
+default_animation_set_id = &"main"
 metadata/_custom_type_script = "uid://b0heyc47lb5h3"

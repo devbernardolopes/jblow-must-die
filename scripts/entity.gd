@@ -14,32 +14,34 @@ const INERTIA_CONTROL_SPEED_MPS: float = 1.0
 const INERTIA_STOP_SPEED_MPS: float = 0.05
 
 signal push_rejected(target: Node, required_strength: int)
+signal action_triggered(action_id: StringName)
 
 @export var data: EntityData = null:
 	set(v):
 		data = v
-		setup_visual()
-
-@export var current_animation: StringName = &"idle":
-	set(v):
-		current_animation = v
-		setup_visual()
+		_refresh_animation_set()
 
 @export var speed_multiplier: float = 1.0
 
 @export var frame_scale_multiplier: float = 1.0:
 	set(v):
 		frame_scale_multiplier = v
-		setup_visual()
+		if visual != null:
+			visual.scale = Vector2.ONE * v
 
 @export var collision_offset: Vector2 = Vector2.ZERO:
 	set(v):
 		collision_offset = v
 		_configure_collision_shape()
 
-@export var current_weapon: WeaponData = null
+@export var current_weapon: WeaponData = null:
+	set(v):
+		current_weapon = v
+		_action_ready_msec.clear()
+		_refresh_animation_set()
 
 var visual: AnimatedSprite2D = null
+var animator: EntityAnimator = null
 var collision: CollisionShape2D = null
 var interaction: Area2D = null
 var controller: EntityController = null
@@ -55,23 +57,12 @@ var _last_push_reject_target: Node = null
 var _last_push_reject_msec: int = -PUSH_REJECT_INTERVAL_MS
 ## Momentum inherited from a moving vehicle, in m/s; decays with ground friction.
 var _inertia_velocity_mps: Vector2 = Vector2.ZERO
-
-func setup_visual() -> void:
-	if not visual:
-		visual = AnimatedSprite2D.new()
-		add_child(visual)
-	if data and data.animation_set and not data.animation_set.is_empty():
-		visual.sprite_frames = data.animation_set[0].sprite_frames
-		visual.scale = Vector2.ONE * frame_scale_multiplier
-		if visual.sprite_frames.has_animation(current_animation):
-			visual.play(current_animation)
-		#else:
-			#current_animation = &"idle"
+var _action_ready_msec: Dictionary[StringName, int] = {}
 
 func _ready() -> void:
-	setup_visual()
+	_refresh_animation_set()
 	_configure_collision_shape()
-	
+
 	if not Engine.is_editor_hint():
 		if controller == null:
 			controller = _find_controller()
@@ -81,6 +72,31 @@ func _ready() -> void:
 	collision_layer = PhysicsLayers.ENTITIES
 	collision_mask = PhysicsLayers.WORLD | PhysicsLayers.ENTITIES | PhysicsLayers.OBJECTS
 	add_to_group(&"entities")
+
+func _ensure_visual() -> void:
+	if visual == null:
+		visual = AnimatedSprite2D.new()
+		add_child(visual)
+	if animator == null:
+		animator = EntityAnimator.new()
+		animator.bind(visual)
+		animator.action_triggered.connect(_on_animator_action_triggered)
+	visual.scale = Vector2.ONE * frame_scale_multiplier
+
+func _refresh_animation_set() -> void:
+	_ensure_visual()
+	animator.apply_set(_resolve_animation_set())
+
+func _resolve_animation_set() -> EntityAnimationSet:
+	if data == null or data.animation_sets.is_empty():
+		return null
+	if current_weapon != null:
+		var weapon_set: EntityAnimationSet = data.get_animation_set(current_weapon.name)
+		if weapon_set != null:
+			return weapon_set
+		push_warning("Entity has no animation set for weapon '%s'." % current_weapon.name)
+		return null
+	return data.get_animation_set(data.default_animation_set_id)
 
 func _find_controller() -> EntityController:
 	for child: Node in get_children():
@@ -106,6 +122,8 @@ func set_locked(value: bool) -> void:
 	if locked:
 		velocity = Vector2.ZERO
 		_inertia_velocity_mps = Vector2.ZERO
+		if animator != null:
+			animator.cancel_action()
 
 func get_speed_mps() -> float:
 	return Units.px_to_m(velocity.length())
@@ -117,13 +135,31 @@ func get_velocity_mps() -> Vector2:
 func wants_run() -> bool:
 	return controller != null and controller.wants_run() and not is_staggered()
 
-func wants_attack() -> bool:
-	return controller != null and controller.wants_attack() and not is_staggered()
+## Attempts to start an animation action; returns whether it started.
+func try_action(action_id: StringName) -> bool:
+	if animator == null:
+		return false
+	var now: int = Time.get_ticks_msec()
+	var ready_at: int = _action_ready_msec.get(action_id, 0)
+	if now < ready_at:
+		return false
+	if not animator.request_action(action_id):
+		return false
+	var cooldown_s: float = 0.0
+	if current_weapon != null and action_id == current_weapon.attack_action:
+		cooldown_s = current_weapon.cooldown_period
+	if cooldown_s > 0.0:
+		_action_ready_msec[action_id] = now + int(ceilf(cooldown_s * 1000.0))
+	return true
 
+## Hook for spawning the weapon's projectile or hit effect.
 func _fire() -> void:
 	pass
-	#var dir := (aim_target - muzzle.global_position).normalized()
-	#Projectile.spawn(current_weapon.projectile, muzzle.global_position, facing, self)
+
+func _on_animator_action_triggered(action_id: StringName) -> void:
+	action_triggered.emit(action_id)
+	if action_id == &"shoot":
+		_fire()
 
 ## D&D ability score; average when the entity has no data resource.
 func get_strength() -> int:
@@ -142,30 +178,57 @@ func is_staggered() -> bool:
 	return _inertia_velocity_mps.length() > INERTIA_CONTROL_SPEED_MPS
 
 func _physics_process(delta: float) -> void:
-	if not Engine.is_editor_hint():
-		if locked:
-			velocity = Vector2.ZERO
-			_inertia_velocity_mps = Vector2.ZERO
-			move_and_slide()
-			return
-		if controller == null or data == null:
-			velocity = Units.to_px(_inertia_velocity_mps)
-			move_and_slide()
-			_decay_inertia(delta)
-			return
-		#_update_terrain(delta)
-		_update_footstep(delta)
-		var move_mode: EntityController.MovementMode = controller.movement_mode
-		if move_mode == EntityController.MovementMode.RELATIVE:
-			_resolve_relative(delta)
-		else:
-			_resolve_omni(delta)
+	if Engine.is_editor_hint():
+		return
+	if locked:
+		velocity = Vector2.ZERO
+		_inertia_velocity_mps = Vector2.ZERO
+		move_and_slide()
+		_tick_animator(delta, false)
+		return
+	if controller == null or data == null:
+		velocity = Units.to_px(_inertia_velocity_mps)
+		move_and_slide()
 		_decay_inertia(delta)
+		_tick_animator(delta, false)
+		return
+	_try_controller_action()
+	_update_footstep(delta)
+	var intent: Vector2 = _get_intent()
+	var is_moving: bool = not is_staggered() and not intent.is_zero_approx()
+	if animator != null and animator.locks_movement():
+		intent = Vector2.ZERO
+	var move_mode: EntityController.MovementMode = controller.movement_mode
+	if move_mode == EntityController.MovementMode.RELATIVE:
+		_resolve_relative(delta, intent)
+	else:
+		_resolve_omni(delta, intent)
+	_decay_inertia(delta)
+	_tick_animator(delta, is_moving)
 
-func _resolve_omni(delta: float) -> void:
+func _tick_animator(delta: float, moving: bool) -> void:
+	if animator != null:
+		animator.tick(delta, moving)
+
+func _try_controller_action() -> void:
+	if controller == null:
+		return
+	var action_id: StringName = controller.get_action_request()
+	if action_id.is_empty():
+		return
+	try_action(action_id)
+
+func _get_intent() -> Vector2:
+	if controller == null:
+		return Vector2.ZERO
+	if controller.movement_mode == EntityController.MovementMode.RELATIVE:
+		return controller.get_move_intent()
+	return controller.get_move_vector()
+
+func _resolve_omni(delta: float, intent: Vector2) -> void:
 	var move_vector: Vector2 = Vector2.ZERO
 	if not is_staggered():
-		move_vector = controller.get_move_vector().limit_length(1.0)
+		move_vector = intent.limit_length(1.0)
 	if move_vector != Vector2.ZERO:
 		facing = move_vector.normalized()
 		if visual != null:
@@ -180,13 +243,13 @@ func look_toward(direction: Vector2, delta: float) -> void:
 		return
 	facing = direction.normalized()
 	rotation = lerp_angle(rotation, facing.angle(), minf(1.0, delta * TURN_RATE))
-	
-func _resolve_relative(delta: float) -> void:
-	var intent: Vector2 = Vector2.ZERO
+
+func _resolve_relative(delta: float, intent: Vector2) -> void:
+	var move_intent: Vector2 = Vector2.ZERO
 	if not is_staggered():
-		intent = controller.get_move_intent().limit_length(1.0)
-	var turn_input: float = intent.x
-	var throttle_input: float = intent.y
+		move_intent = intent.limit_length(1.0)
+	var turn_input: float = move_intent.x
+	var throttle_input: float = move_intent.y
 	if absf(turn_input) > 0.001:
 		var turn_rate: float = controller.turn_rate_rad_s
 		if turn_rate < 0.0:
@@ -201,7 +264,6 @@ func _resolve_relative(delta: float) -> void:
 		if reverse_factor < 0.0:
 			reverse_factor = 0.0
 		move_speed_factor = reverse_factor
-	#var throttle_magnitude: float = absf(throttle_input)
 	var move_vector: Vector2 = facing * throttle_input
 	velocity = ((move_vector * Units.m_to_px(speed_mps * speed_multiplier * _terrain_speed_factor * move_speed_factor)) + Units.to_px(_inertia_velocity_mps))
 	move_and_slide()
@@ -250,8 +312,6 @@ func _update_footstep(delta: float) -> void:
 		_footstep_accumulated_m += speed_mps * delta
 		if _footstep_accumulated_m >= _footstep_interval_m:
 			_footstep_accumulated_m -= _footstep_interval_m
-			#if data != null and data.sound_set != null and data.sound_set.footstep_stream != null:
-				#AudioManager.play_at(global_position / Units.PX_PER_METER, data.sound_set.footstep_stream)
 
 func _configure_collision_shape() -> void:
 	if collision == null:

@@ -8,4 +8,6 @@ name = &"handgun"
 kind = "Gun"
 base_damage = 10.0
 ammo_amount = 12
+attack_action = &"shoot"
+reload_action = &"reload"
 metadata/_custom_type_script = "uid://bln4irpuvk00t"

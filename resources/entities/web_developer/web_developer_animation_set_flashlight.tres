@@ -56,6 +56,7 @@
 [ext_resource type="Texture2D" uid="uid://xhd3kro0fen5" path="res://assets/images/entities/web_developer/flashlight/move/survivor-move_flashlight_17.png" id="54_gh8e8"]
 [ext_resource type="Texture2D" uid="uid://ch88yd2f2rmuv" path="res://assets/images/entities/web_developer/flashlight/move/survivor-move_flashlight_18.png" id="55_2h6o1"]
 [ext_resource type="Texture2D" uid="uid://bnfqou1a6gi0i" path="res://assets/images/entities/web_developer/flashlight/move/survivor-move_flashlight_19.png" id="56_1mrek"]
+[ext_resource type="Script" uid="uid://dic86sdkuohg5" path="res://resources/entity_animation_action.gd" id="99_action"]
 
 [sub_resource type="SpriteFrames" id="SpriteFrames_cgar7"]
 animations = [{
@@ -235,13 +236,20 @@ animations = [{
 "duration": 1.0,
 "texture": ExtResource("56_1mrek")
 }],
-"loop": 0,
+"loop": 1,
 "name": &"move",
 "speed": 24.0
 }]
 
+[sub_resource type="Resource" id="Resource_melee_attack"]
+script = ExtResource("99_action")
+id = &"melee_attack"
+animation = &"melee_attack"
+priority = 3
+
 [resource]
 script = ExtResource("1_sbvy3")
-name = "flashlight"
+id = &"flashlight"
 sprite_frames = SubResource("SpriteFrames_cgar7")
+actions = Array[ExtResource("99_action")]([SubResource("Resource_melee_attack")])
 metadata/_custom_type_script = "uid://bo74pbkpstasp"
