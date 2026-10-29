@@ -122,6 +122,9 @@ func _ready() -> void:
 	_sync_material()
 	_connect_sources()
 	rebuild_geometry()
+	# Sources join their group from _ready(). Run once more after the current
+	# ready pass so every authored wall is present regardless of tree order.
+	call_deferred(&"rebuild_geometry")
 
 
 func _process(delta: float) -> void:

@@ -44,6 +44,7 @@ func _run() -> void:
 	_test_visibility()
 	_test_wall_geometry()
 	_test_source_geometry()
+	await _test_late_source_registration()
 	if _failures == 0:
 		print("Minimap tests: PASS")
 		quit(0)
@@ -254,6 +255,24 @@ func _test_source_geometry() -> void:
 	_assert(source.get_minimap_geometry().is_empty(), "hidden sources return nothing")
 
 	source.free()
+
+
+func _test_late_source_registration() -> void:
+	var minimap := _make_minimap()
+	await process_frame
+	_assert(minimap.get_geometry().is_empty(), "empty minimap starts without geometry")
+
+	var wall := Wall.new()
+	var curve := Curve2D.new()
+	curve.add_point(Vector2.ZERO)
+	curve.add_point(Vector2(100.0, 0.0))
+	wall.curve = curve
+	root.add_child(wall)
+	await process_frame
+	_assert(minimap.get_geometry().size() == 1, "late wall refreshes minimap geometry")
+
+	wall.free()
+	minimap.free()
 
 
 func _make_minimap() -> Minimap:

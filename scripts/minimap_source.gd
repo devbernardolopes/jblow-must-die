@@ -35,6 +35,7 @@ extends Node2D
 
 func _ready() -> void:
 	add_to_group(&"minimap_source")
+	call_deferred(&"notify_minimap_changed")
 
 
 func get_minimap_geometry() -> Array[MinimapGeometry]:

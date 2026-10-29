@@ -70,6 +70,7 @@ var _last_viewer := Vector2(NAN, NAN)  # local space; NAN = needs refresh, INF =
 
 func _ready() -> void:
 	add_to_group(&"minimap_source")
+	call_deferred(&"_notify_minimap_changed")
 	line = Line2D.new()
 	line.name = "Line"
 	add_child(line, false, Node.INTERNAL_MODE_FRONT)
@@ -82,6 +83,13 @@ func _ready() -> void:
 
 	_apply_style()
 	_rebuild()
+
+
+## Tell an already-running minimap about a wall instanced after it.
+func _notify_minimap_changed() -> void:
+	if not is_inside_tree():
+		return
+	get_tree().call_group(&"minimap", &"rebuild_geometry")
 
 func _process(_delta: float) -> void:
 	# Reconnect if the Curve resource was created/replaced in the Inspector
