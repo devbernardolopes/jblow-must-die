@@ -6,12 +6,18 @@
 [ext_resource type="Script" uid="uid://fpy3d3ekenn8" path="res://scripts/player_controller.gd" id="4_4mrxx"]
 [ext_resource type="Script" uid="uid://cwq11bwr8h2h8" path="res://scripts/wall.gd" id="4_71j4m"]
 [ext_resource type="Resource" uid="uid://7b3w44xgatiu" path="res://resources/entities/zombies/zombie.tres" id="5_e3hyu"]
-[ext_resource type="Resource" uid="uid://bp0cqsl0kkg3k" path="res://resources/weapons/handgun_weapon.tres" id="5_q5onr"]
+[ext_resource type="Resource" uid="uid://dcgqgimnkh3ng" path="res://resources/weapons/flashlight_weapon.tres" id="5_q5onr"]
 [ext_resource type="Texture2D" uid="uid://cob4ubhuebdyg" path="res://assets/images/textures/mtl_g01metaltrim02b.png" id="5_qfnet"]
 [ext_resource type="Script" uid="uid://cg1uto20g3kh3" path="res://scripts/walls_helper.gd" id="5_w7kh3"]
+[ext_resource type="Script" uid="uid://bln4irpuvk00t" path="res://resources/weapon_data.gd" id="6_7t5mc"]
 [ext_resource type="Script" uid="uid://cufxcsg1oinft" path="res://scripts/follow_camera.gd" id="6_qfnet"]
+[ext_resource type="Resource" uid="uid://bp0cqsl0kkg3k" path="res://resources/weapons/handgun_weapon.tres" id="7_lakw3"]
 [ext_resource type="Texture2D" uid="uid://cooiv6jdkono4" path="res://assets/images/textures/sld_g01misctrim01.png" id="8_7r4gi"]
+[ext_resource type="Resource" uid="uid://j26o6wdfa204" path="res://resources/weapons/hands_weapon.tres" id="8_pm21f"]
 [ext_resource type="Texture2D" uid="uid://dc8gssllawkb3" path="res://assets/images/textures/Photoreal_Metal_01-512x512.png" id="8_w7kh3"]
+[ext_resource type="Resource" uid="uid://dkgwsb5a2ewhx" path="res://resources/weapons/rifle_weapon.tres" id="9_2lf6f"]
+[ext_resource type="Resource" uid="uid://c3hie3old5k53" path="res://resources/weapons/shotgun_weapon.tres" id="10_7iits"]
+[ext_resource type="Resource" path="res://resources/weapons/knife_weapon.tres" id="11_lakw3"]
 
 [sub_resource type="Curve2D" id="Curve2D_q5onr"]
 bake_interval = 8.0
@@ -81,6 +87,8 @@ motion_mode = 1
 script = ExtResource("1_rwgxs")
 data = ExtResource("5_e3hyu")
 collision_offset = Vector2(-32, 12)
+current_weapon = ExtResource("8_pm21f")
+available_weapons = Array[ExtResource("6_7t5mc")]([ExtResource("8_pm21f")])
 metadata/_custom_type_script = "uid://0yh2bjs84b32"
 
 [node name="Hero" type="CharacterBody2D" parent="Entities" unique_id=1469266724]
@@ -92,7 +100,8 @@ script = ExtResource("1_rwgxs")
 data = ExtResource("2_4wyf3")
 speed_multiplier = 3.0
 collision_offset = Vector2(-11, 13)
-current_weapon = ExtResource("5_q5onr")
+current_weapon = ExtResource("11_lakw3")
+available_weapons = Array[ExtResource("6_7t5mc")]([ExtResource("5_q5onr"), ExtResource("7_lakw3"), ExtResource("9_2lf6f"), ExtResource("10_7iits"), ExtResource("11_lakw3")])
 metadata/_custom_type_script = "uid://0yh2bjs84b32"
 
 [node name="PlayerController" type="Node" parent="Entities/Hero" unique_id=385327029]

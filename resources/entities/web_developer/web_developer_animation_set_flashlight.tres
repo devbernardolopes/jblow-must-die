@@ -58,6 +58,12 @@
 [ext_resource type="Texture2D" uid="uid://bnfqou1a6gi0i" path="res://assets/images/entities/web_developer/flashlight/move/survivor-move_flashlight_19.png" id="56_1mrek"]
 [ext_resource type="Script" uid="uid://dic86sdkuohg5" path="res://resources/entity_animation_action.gd" id="99_action"]
 
+[sub_resource type="Resource" id="Resource_melee_attack"]
+script = ExtResource("99_action")
+id = &"melee_attack"
+animation = &"melee_attack"
+priority = 3
+
 [sub_resource type="SpriteFrames" id="SpriteFrames_cgar7"]
 animations = [{
 "frames": [{
@@ -240,12 +246,6 @@ animations = [{
 "name": &"move",
 "speed": 24.0
 }]
-
-[sub_resource type="Resource" id="Resource_melee_attack"]
-script = ExtResource("99_action")
-id = &"melee_attack"
-animation = &"melee_attack"
-priority = 3
 
 [resource]
 script = ExtResource("1_sbvy3")

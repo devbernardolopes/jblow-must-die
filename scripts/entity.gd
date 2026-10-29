@@ -40,6 +40,8 @@ signal action_triggered(action_id: StringName)
 		_action_ready_msec.clear()
 		_refresh_animation_set()
 
+@export var available_weapons: Array[WeaponData] = []
+
 var visual: AnimatedSprite2D = null
 var animator: EntityAnimator = null
 var collision: CollisionShape2D = null
