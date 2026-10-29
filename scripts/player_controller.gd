@@ -24,6 +24,13 @@ func get_action_request() -> StringName:
 		return &"melee_attack"
 	return &""
 
+func get_weapon_switch() -> int:
+	if Input.is_action_just_pressed("next_weapon"):
+		return 1
+	if Input.is_action_just_pressed("previous_weapon"):
+		return -1
+	return 0
+
 func _attack_action() -> StringName:
 	if _entity == null or _entity.current_weapon == null:
 		return &"melee_attack"

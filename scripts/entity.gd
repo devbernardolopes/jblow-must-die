@@ -28,6 +28,7 @@ signal action_triggered(action_id: StringName)
 		frame_scale_multiplier = v
 		if visual != null:
 			visual.scale = Vector2.ONE * v
+		_refresh_muzzle()
 
 @export var collision_offset: Vector2 = Vector2.ZERO:
 	set(v):
@@ -37,10 +38,14 @@ signal action_triggered(action_id: StringName)
 @export var current_weapon: WeaponData = null:
 	set(v):
 		current_weapon = v
-		_action_ready_msec.clear()
+		_reload_weapon = null
 		_refresh_animation_set()
 
 @export var available_weapons: Array[WeaponData] = []
+## Used by projectiles to avoid damaging entities on the same side.
+@export var team: StringName = &""
+## Node projectiles spawn from; positioned from the equipped weapon's muzzle_offset.
+@export var muzzle: Marker2D = null
 
 var visual: AnimatedSprite2D = null
 var animator: EntityAnimator = null
@@ -60,6 +65,10 @@ var _last_push_reject_msec: int = -PUSH_REJECT_INTERVAL_MS
 ## Momentum inherited from a moving vehicle, in m/s; decays with ground friction.
 var _inertia_velocity_mps: Vector2 = Vector2.ZERO
 var _action_ready_msec: Dictionary[StringName, int] = {}
+## Runtime magazine contents keyed by WeaponData.name; resources are shared.
+var _ammo_by_weapon: Dictionary[StringName, int] = {}
+## Weapon whose reload is currently playing, so its trigger refills the right gun.
+var _reload_weapon: WeaponData = null
 
 func _ready() -> void:
 	_refresh_animation_set()
@@ -70,6 +79,7 @@ func _ready() -> void:
 			controller = _find_controller()
 		if interaction == null:
 			interaction = Area2D.new()
+			add_child(interaction)
 	motion_mode = CharacterBody2D.MOTION_MODE_FLOATING
 	collision_layer = PhysicsLayers.ENTITIES
 	collision_mask = PhysicsLayers.WORLD | PhysicsLayers.ENTITIES | PhysicsLayers.OBJECTS
@@ -79,15 +89,29 @@ func _ensure_visual() -> void:
 	if visual == null:
 		visual = AnimatedSprite2D.new()
 		add_child(visual)
+	if muzzle == null:
+		muzzle = Marker2D.new()
+		muzzle.name = "Muzzle"
+		add_child(muzzle)
 	if animator == null:
 		animator = EntityAnimator.new()
 		animator.bind(visual)
 		animator.action_triggered.connect(_on_animator_action_triggered)
+		animator.action_finished.connect(_on_animator_action_finished)
 	visual.scale = Vector2.ONE * frame_scale_multiplier
 
 func _refresh_animation_set() -> void:
 	_ensure_visual()
 	animator.apply_set(_resolve_animation_set())
+	_refresh_muzzle()
+
+func _refresh_muzzle() -> void:
+	if muzzle == null:
+		return
+	if current_weapon == null:
+		muzzle.position = Vector2.ZERO
+		return
+	muzzle.position = current_weapon.muzzle_offset * frame_scale_multiplier
 
 func _resolve_animation_set() -> EntityAnimationSet:
 	if data == null or data.animation_sets.is_empty():
@@ -137,31 +161,170 @@ func get_velocity_mps() -> Vector2:
 func wants_run() -> bool:
 	return controller != null and controller.wants_run() and not is_staggered()
 
+## Steps to the next weapon in available_weapons; ignored while an action is busy.
+func select_next_weapon() -> bool:
+	return _step_weapon(1)
+
+## Steps to the previous weapon in available_weapons; ignored while an action is busy.
+func select_previous_weapon() -> bool:
+	return _step_weapon(-1)
+
+func add_available_weapon(weapon: WeaponData, equip_if_empty: bool = true) -> bool:
+	if weapon == null or _index_of_weapon(weapon) >= 0:
+		return false
+	available_weapons.append(weapon)
+	if equip_if_empty and current_weapon == null:
+		current_weapon = weapon
+	return true
+
+func remove_available_weapon(weapon: WeaponData) -> bool:
+	var index: int = _index_of_weapon(weapon)
+	if index < 0:
+		return false
+	var was_current: bool = current_weapon != null and current_weapon.name == weapon.name
+	available_weapons.remove_at(index)
+	if not was_current:
+		return true
+	var next_weapon: WeaponData = null
+	for offset: int in range(available_weapons.size()):
+		var candidate: WeaponData = available_weapons[posmod(index + offset, available_weapons.size())]
+		if candidate != null:
+			next_weapon = candidate
+			break
+	current_weapon = next_weapon
+	return true
+
+func _step_weapon(direction: int) -> bool:
+	if not _can_switch_weapon() or available_weapons.is_empty():
+		return false
+	var size: int = available_weapons.size()
+	var index: int = _index_of_weapon(current_weapon)
+	if index < 0:
+		index = -1 if direction > 0 else 0
+	var step: int = signi(direction)
+	for _attempt: int in range(size):
+		index = posmod(index + step, size)
+		var candidate: WeaponData = available_weapons[index]
+		if candidate != null and candidate != current_weapon:
+			current_weapon = candidate
+			return true
+	return false
+
+func _can_switch_weapon() -> bool:
+	if locked:
+		return false
+	return animator == null or not animator.is_busy()
+
+func _index_of_weapon(weapon: WeaponData) -> int:
+	if weapon == null:
+		return -1
+	for index: int in range(available_weapons.size()):
+		var candidate: WeaponData = available_weapons[index]
+		if candidate != null and candidate.name == weapon.name:
+			return index
+	return -1
+
+func get_ammo_capacity(weapon: WeaponData) -> int:
+	if weapon == null:
+		return 0
+	return maxi(weapon.ammo_amount, 0)
+
+func get_ammo(weapon: WeaponData) -> int:
+	var capacity: int = get_ammo_capacity(weapon)
+	if weapon == null or capacity <= 0:
+		return 0
+	if not _ammo_by_weapon.has(weapon.name):
+		_ammo_by_weapon[weapon.name] = capacity
+	return _ammo_by_weapon[weapon.name]
+
+func is_out_of_ammo(weapon: WeaponData) -> bool:
+	if weapon == null or not weapon.can_shoot():
+		return false
+	if get_ammo_capacity(weapon) <= 0:
+		return false
+	return get_ammo(weapon) <= 0
+
 ## Attempts to start an animation action; returns whether it started.
 func try_action(action_id: StringName) -> bool:
-	if animator == null:
+	if animator == null or not _can_start_action(action_id):
 		return false
 	var now: int = Time.get_ticks_msec()
-	var ready_at: int = _action_ready_msec.get(action_id, 0)
-	if now < ready_at:
+	var cooldown_key: StringName = _cooldown_key(current_weapon, action_id)
+	if now < _action_ready_msec.get(cooldown_key, 0):
 		return false
 	if not animator.request_action(action_id):
 		return false
-	var cooldown_s: float = 0.0
-	if current_weapon != null and action_id == current_weapon.attack_action:
-		cooldown_s = current_weapon.cooldown_period
-	if cooldown_s > 0.0:
-		_action_ready_msec[action_id] = now + int(ceilf(cooldown_s * 1000.0))
+	if current_weapon == null:
+		return true
+	if action_id == current_weapon.reload_action:
+		_reload_weapon = current_weapon
+	elif action_id == current_weapon.attack_action and current_weapon.cooldown_period > 0.0:
+		_action_ready_msec[cooldown_key] = now + int(ceilf(current_weapon.cooldown_period * 1000.0))
 	return true
+
+func _can_start_action(action_id: StringName) -> bool:
+	if current_weapon == null:
+		return true
+	if action_id == current_weapon.attack_action:
+		return not (current_weapon.can_shoot() and is_out_of_ammo(current_weapon))
+	if action_id == current_weapon.reload_action:
+		if not current_weapon.can_reload():
+			return false
+		return get_ammo(current_weapon) < get_ammo_capacity(current_weapon)
+	return true
+
+func _cooldown_key(weapon: WeaponData, action_id: StringName) -> StringName:
+	if weapon == null:
+		return action_id
+	return StringName("%s:%s" % [weapon.name, action_id])
+
+func _consume_ammo(weapon: WeaponData) -> void:
+	var capacity: int = get_ammo_capacity(weapon)
+	if weapon == null or capacity <= 0:
+		return
+	_ammo_by_weapon[weapon.name] = maxi(get_ammo(weapon) - 1, 0)
+
+func _refill_ammo(weapon: WeaponData) -> void:
+	var capacity: int = get_ammo_capacity(weapon)
+	if weapon == null or capacity <= 0:
+		return
+	_ammo_by_weapon[weapon.name] = capacity
 
 ## Hook for spawning the weapon's projectile or hit effect.
 func _fire() -> void:
-	pass
+	if current_weapon == null or not current_weapon.can_shoot():
+		return
+	if is_out_of_ammo(current_weapon):
+		return
+	if muzzle == null:
+		_ensure_visual()
+	var origin: Vector2 = muzzle.global_position
+	var forward: Vector2 = muzzle.global_transform.x.normalized()
+	if forward.is_zero_approx():
+		forward = facing
+	var count: int = maxi(current_weapon.projectile_count, 1)
+	var spread_rad: float = deg_to_rad(current_weapon.spread_degrees)
+	var step: float = 0.0 if count <= 1 else spread_rad / float(count - 1)
+	var start: float = -spread_rad * 0.5
+	var pellet_damage: float = current_weapon.get_projectile_damage()
+	_consume_ammo(current_weapon)
+	for index: int in range(count):
+		var direction: Vector2 = forward.rotated(start + step * float(index))
+		Projectile.spawn(current_weapon.projectile, origin, direction, self, pellet_damage)
 
 func _on_animator_action_triggered(action_id: StringName) -> void:
 	action_triggered.emit(action_id)
-	if action_id == &"shoot":
+	if current_weapon == null:
+		return
+	if action_id == current_weapon.attack_action:
 		_fire()
+	elif action_id == current_weapon.reload_action and _reload_weapon != null:
+		_refill_ammo(_reload_weapon)
+		_reload_weapon = null
+
+func _on_animator_action_finished(action_id: StringName) -> void:
+	if _reload_weapon != null and action_id == _reload_weapon.reload_action:
+		_reload_weapon = null
 
 ## D&D ability score; average when the entity has no data resource.
 func get_strength() -> int:
@@ -194,6 +357,7 @@ func _physics_process(delta: float) -> void:
 		_decay_inertia(delta)
 		_tick_animator(delta, false)
 		return
+	_try_weapon_switch()
 	_try_controller_action()
 	_update_footstep(delta)
 	var intent: Vector2 = _get_intent()
@@ -211,6 +375,15 @@ func _physics_process(delta: float) -> void:
 func _tick_animator(delta: float, moving: bool) -> void:
 	if animator != null:
 		animator.tick(delta, moving)
+
+func _try_weapon_switch() -> void:
+	if controller == null:
+		return
+	var switch_request: int = controller.get_weapon_switch()
+	if switch_request > 0:
+		select_next_weapon()
+	elif switch_request < 0:
+		select_previous_weapon()
 
 func _try_controller_action() -> void:
 	if controller == null:

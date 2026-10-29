@@ -1,6 +1,7 @@
 [gd_resource type="Resource" script_class="WeaponData" format=3 uid="uid://dkgwsb5a2ewhx"]
 
 [ext_resource type="Script" uid="uid://bln4irpuvk00t" path="res://resources/weapon_data.gd" id="1_g0s51"]
+[ext_resource type="Resource" path="res://resources/projectiles/rifle_bullet.tres" id="2_bullet"]
 
 [resource]
 script = ExtResource("1_g0s51")
@@ -9,5 +10,7 @@ kind = "Gun"
 base_damage = 50.0
 cooldown_period = 2.25
 ammo_amount = 2
+projectile = ExtResource("2_bullet")
+muzzle_offset = Vector2(133, 48)
 attack_action = &"shoot"
 metadata/_custom_type_script = "uid://bln4irpuvk00t"

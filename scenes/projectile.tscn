@@ -3,6 +3,9 @@
 [ext_resource type="Script" uid="uid://cgbil53mmbx0p" path="res://scripts/projectile.gd" id="1_c8fcr"]
 
 [node name="Projectile" type="CharacterBody2D" unique_id=1105275104]
+collision_layer = 8
+collision_mask = 5
+motion_mode = 1
 script = ExtResource("1_c8fcr")
 
 [node name="Sprite" type="AnimatedSprite2D" parent="." unique_id=2004555292]
@@ -10,5 +13,8 @@ script = ExtResource("1_c8fcr")
 [node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=1912163472]
 
 [node name="Hitbox" type="Area2D" parent="." unique_id=1824869740]
+collision_layer = 0
+collision_mask = 2
+monitorable = false
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="Hitbox" unique_id=1481888697]

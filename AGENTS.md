@@ -30,6 +30,9 @@ This game is currently being developed and it is in very early stages. No one is
 - Controllers never drive animations directly. They return an action id from `get_action_request()`; `Entity.try_action()` handles cooldown gating and the animator handles playback.
 - `WeaponData.attack_action` and `reload_action` name the actions in the equipped set (handgun: `shoot`, `reload`; melee: `melee_attack`).
 - Resource scripts referenced by the `@tool` `Entity` (for example `EntityData`) must also be `@tool`, otherwise the editor loads a placeholder instance and method calls fail.
+- Guns need a `ProjectileData` plus an explicit `shoot` action with `trigger_frame` set, otherwise the animation plays but no projectile spawns.
+- Weapon switching is ignored while an action is busy. Cooldowns are keyed by weapon and action, so swapping cannot reset them.
+- Ammo is per entity, keyed by `WeaponData.name`. `base_damage` is per shot and is divided across `projectile_count`; reload refills when the reload action reaches its `trigger_frame`.
 
 ## Testing
 
@@ -49,6 +52,8 @@ godot --headless --path . --check-only --script res://scripts/entity_animator.gd
 godot --headless --path . --script res://tests/test_entity_animator.gd
 godot --headless --path . --script res://tests/test_animation_resources.gd
 godot --headless --path . --script res://tests/test_entity_animation_integration.gd
+godot --headless --path . --script res://tests/test_weapon_system.gd
+godot --headless --path . --script res://tests/test_projectiles.gd
 ```
 
 `--import` must report no errors before the tests; the resource test also validates authored `.tres` animation sets, so extend it when adding a set or weapon.

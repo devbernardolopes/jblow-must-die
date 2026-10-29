@@ -25,3 +25,7 @@ func wants_run() -> bool:
 ## Action id to try this frame, or &"" for none.
 func get_action_request() -> StringName:
 	return &""
+
+## -1 selects the previous weapon, +1 the next one, 0 leaves it alone.
+func get_weapon_switch() -> int:
+	return 0

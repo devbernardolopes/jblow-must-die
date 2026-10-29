@@ -1,6 +1,7 @@
 [gd_resource type="Resource" script_class="WeaponData" format=3 uid="uid://c3hie3old5k53"]
 
 [ext_resource type="Script" uid="uid://bln4irpuvk00t" path="res://resources/weapon_data.gd" id="1_oj1wo"]
+[ext_resource type="Resource" path="res://resources/projectiles/shotgun_pellet.tres" id="2_pellet"]
 
 [resource]
 script = ExtResource("1_oj1wo")
@@ -9,5 +10,9 @@ kind = "Gun"
 base_damage = 20.0
 cooldown_period = 1.25
 ammo_amount = 6
+projectile = ExtResource("2_pellet")
+projectile_count = 8
+spread_degrees = 18.0
+muzzle_offset = Vector2(133, 48)
 attack_action = &"shoot"
 metadata/_custom_type_script = "uid://bln4irpuvk00t"

@@ -1,6 +1,7 @@
 [gd_resource type="Resource" script_class="WeaponData" format=3 uid="uid://bp0cqsl0kkg3k"]
 
 [ext_resource type="Script" uid="uid://bln4irpuvk00t" path="res://resources/weapon_data.gd" id="1_yn5nt"]
+[ext_resource type="Resource" path="res://resources/projectiles/handgun_bullet.tres" id="2_bullet"]
 
 [resource]
 script = ExtResource("1_yn5nt")
@@ -8,6 +9,8 @@ name = &"handgun"
 kind = "Gun"
 base_damage = 10.0
 ammo_amount = 12
+projectile = ExtResource("2_bullet")
+muzzle_offset = Vector2(114, 53)
 attack_action = &"shoot"
 reload_action = &"reload"
 metadata/_custom_type_script = "uid://bln4irpuvk00t"

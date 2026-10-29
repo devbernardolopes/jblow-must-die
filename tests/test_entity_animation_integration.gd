@@ -71,7 +71,7 @@ func _test_zombie() -> void:
 	if entity.animator == null:
 		entity.free()
 		return
-	_assert(entity.animator.get_animation_set_id() == &"main", "zombie default set is active")
+	_assert(entity.animator.get_animation_set_id() == &"hands", "zombie hands set is active")
 	_assert(entity.animator.get_current_animation() == &"idle", "zombie idle is playing")
 	entity._try_controller_action()
 	_assert(entity.animator.get_action_id() == &"attack", "zombie attack starts from the controller")

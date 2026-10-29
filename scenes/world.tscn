@@ -86,6 +86,7 @@ collision_mask = 7
 motion_mode = 1
 script = ExtResource("1_rwgxs")
 data = ExtResource("5_e3hyu")
+team = &"enemy"
 collision_offset = Vector2(-32, 12)
 current_weapon = ExtResource("8_pm21f")
 available_weapons = Array[ExtResource("6_7t5mc")]([ExtResource("8_pm21f")])
@@ -98,6 +99,7 @@ collision_mask = 7
 motion_mode = 1
 script = ExtResource("1_rwgxs")
 data = ExtResource("2_4wyf3")
+team = &"player"
 speed_multiplier = 3.0
 collision_offset = Vector2(-11, 13)
 current_weapon = ExtResource("11_lakw3")
@@ -108,6 +110,8 @@ metadata/_custom_type_script = "uid://0yh2bjs84b32"
 script = ExtResource("4_4mrxx")
 movement_mode = 1
 metadata/_custom_type_script = "uid://fpy3d3ekenn8"
+
+[node name="Projectiles" type="Node2D" parent="." unique_id=825104731 groups=["projectiles_root"]]
 
 [node name="Walls" type="Node2D" parent="." unique_id=1513112567]
 script = ExtResource("5_w7kh3")

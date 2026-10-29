@@ -1,0 +1,12 @@
+[gd_resource type="Resource" script_class="ProjectileData" format=3]
+
+[ext_resource type="Script" uid="uid://b3scc3g2aif3w" path="res://resources/projectile_data.gd" id="1_data"]
+
+[resource]
+script = ExtResource("1_data")
+animation = &"fly"
+placeholder_color = Color(1, 0.85, 0.35, 1)
+speed = 1600.0
+lifetime = 1.0
+radius = 3.0
+damage = 10.0

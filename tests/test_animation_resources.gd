@@ -1,20 +1,24 @@
 extends SceneTree
-## Headless validation of the authored animation sets and weapons.
+## Headless validation of the authored animation sets, weapons and projectiles.
 
 var _failures: int = 0
 
 func _init() -> void:
-	var web_developer_ids: Array[StringName] = [&"handgun", &"knife", &"flashlight"]
+	var web_developer_ids: Array[StringName] = [
+		&"handgun", &"knife", &"flashlight", &"rifle", &"shotgun"
+	]
 	_check_entity_data(
 		"res://resources/entities/web_developer/web_developer.tres", web_developer_ids, &"handgun"
 	)
-	var zombie_ids: Array[StringName] = [&"main"]
-	_check_entity_data("res://resources/entities/zombies/zombie.tres", zombie_ids, &"main")
+	var zombie_ids: Array[StringName] = [&"hands"]
+	_check_entity_data("res://resources/entities/zombies/zombie.tres", zombie_ids, &"hands")
 
-	_check_weapon("res://resources/weapons/handgun_weapon.tres", &"shoot", true)
-	_check_weapon("res://resources/weapons/knife_weapon.tres", &"melee_attack", false)
-	_check_weapon("res://resources/weapons/flashlight_weapon.tres", &"melee_attack", false)
-	_check_weapon("res://resources/weapons/hands_weapon.tres", &"melee_attack", false)
+	_check_weapon("res://resources/weapons/handgun_weapon.tres", &"shoot", true, true)
+	_check_weapon("res://resources/weapons/rifle_weapon.tres", &"shoot", true, true)
+	_check_weapon("res://resources/weapons/shotgun_weapon.tres", &"shoot", true, true)
+	_check_weapon("res://resources/weapons/knife_weapon.tres", &"melee_attack", false, false)
+	_check_weapon("res://resources/weapons/flashlight_weapon.tres", &"melee_attack", false, false)
+	_check_weapon("res://resources/weapons/hands_weapon.tres", &"melee_attack", false, false)
 
 	if _failures == 0:
 		print("Animation resource tests: PASS")
@@ -84,25 +88,45 @@ func _check_set(animation_set: EntityAnimationSet) -> void:
 		animator.cancel_action()
 	sprite.free()
 
-	if animation_set.id == &"handgun":
+	_check_action_triggers(animation_set)
+
+func _check_action_triggers(animation_set: EntityAnimationSet) -> void:
+	var set_id: StringName = animation_set.id
+	if set_id == &"handgun" or set_id == &"rifle" or set_id == &"shotgun":
 		var shoot := animation_set.get_explicit_action(&"shoot")
-		_assert(shoot != null and shoot.trigger_frame == 1, "handgun shoot triggers on frame 1")
-	if animation_set.id == &"main":
+		_assert(
+			shoot != null and shoot.trigger_frame == 1,
+			"set '%s' shoot triggers on frame 1" % set_id
+		)
+		var reload := animation_set.get_explicit_action(&"reload")
+		_assert(
+			reload != null and reload.trigger_frame > 0,
+			"set '%s' reload refills on a trigger frame" % set_id
+		)
+	if set_id == &"hands":
 		var attack := animation_set.get_explicit_action(&"attack")
-		_assert(attack != null and attack.trigger_frame == 4, "zombie attack triggers on frame 4")
+		_assert(
+			attack != null and attack.trigger_frame == 4,
+			"zombie attack triggers on frame 4"
+		)
 
 func _expected_actions(set_id: StringName) -> Array[StringName]:
 	var actions: Array[StringName] = []
 	match set_id:
-		&"handgun":
+		&"handgun", &"rifle", &"shotgun":
 			actions = [&"shoot", &"reload", &"melee_attack"]
 		&"knife", &"flashlight":
 			actions = [&"melee_attack"]
-		&"main":
+		&"hands":
 			actions = [&"attack"]
 	return actions
 
-func _check_weapon(path: String, expected_attack: StringName, expected_can_reload: bool) -> void:
+func _check_weapon(
+	path: String,
+	expected_attack: StringName,
+	expected_can_reload: bool,
+	expected_can_shoot: bool
+) -> void:
 	var weapon := load(path) as WeaponData
 	_assert(weapon != null, "loads %s" % path)
 	if weapon == null:
@@ -115,6 +139,19 @@ func _check_weapon(path: String, expected_attack: StringName, expected_can_reloa
 		weapon.can_reload() == expected_can_reload,
 		"%s can_reload is %s" % [path, expected_can_reload]
 	)
+	_assert(
+		weapon.can_shoot() == expected_can_shoot,
+		"%s can_shoot is %s" % [path, expected_can_shoot]
+	)
+	if expected_can_shoot:
+		_assert(weapon.projectile != null, "%s has a projectile" % path)
+		_assert(weapon.projectile_count >= 1, "%s spawns at least one projectile" % path)
+		_assert(
+			not weapon.muzzle_offset.is_zero_approx(),
+			"%s has a muzzle offset" % path
+		)
+	else:
+		_assert(weapon.projectile == null, "%s is not projectile based" % path)
 
 func _assert(condition: bool, message: String) -> void:
 	if condition:
