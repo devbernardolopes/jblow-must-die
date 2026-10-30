@@ -161,7 +161,7 @@ speed_multiplier = 3.0
 collision_offset = Vector2(-15, 15)
 current_weapon = ExtResource("10_7iits")
 available_weapons = Array[ExtResource("6_7t5mc")]([ExtResource("7_lakw3"), ExtResource("10_7iits"), ExtResource("12_0nbtd"), ExtResource("13_37qwj"), ExtResource("14_37qwj")])
-muzzle = NodePath("@Marker2D@66221")
+muzzle = NodePath("@Marker2D@19829")
 metadata/_custom_type_script = "uid://0yh2bjs84b32"
 
 [node name="PlayerController" type="Node" parent="Entities/Hero" unique_id=385327029]

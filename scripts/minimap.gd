@@ -27,6 +27,7 @@ const MIN_WORLD_RADIUS_M: float = 1.0
 const MIN_REFRESH_HZ: float = 1.0
 const MIN_MAP_SIZE: float = 1.0
 const BORDER_SEGMENTS: int = 64
+const CORNER_SEGMENTS: int = 8
 
 @export_category("Layout")
 @export var corner: MapCorner = MapCorner.TOP_RIGHT:
@@ -38,7 +39,6 @@ const BORDER_SEGMENTS: int = 64
 	set(value):
 		map_size = value
 		_apply_layout()
-		_sync_material()
 		queue_redraw()
 @export var margin: Vector2 = Vector2(24.0, 24.0):
 	set(value):
@@ -55,12 +55,10 @@ const BORDER_SEGMENTS: int = 64
 @export var shape: Shape = Shape.CIRCLE:
 	set(value):
 		shape = value
-		_sync_material()
 		queue_redraw()
 @export_range(0.0, 64.0, 1.0) var corner_radius: float = 0.0:
 	set(value):
 		corner_radius = value
-		_sync_material()
 		queue_redraw()
 
 @export_category("View")
@@ -119,7 +117,6 @@ func _ready() -> void:
 	if viewport != null and not viewport.size_changed.is_connected(_on_viewport_resized):
 		viewport.size_changed.connect(_on_viewport_resized)
 	_apply_layout()
-	_sync_material()
 	_connect_sources()
 	rebuild_geometry()
 	# Sources join their group from _ready(). Run once more after the current
@@ -210,26 +207,6 @@ func _map_box() -> Vector2:
 	return Vector2(maxf(box.x, MIN_MAP_SIZE), maxf(box.y, MIN_MAP_SIZE))
 
 
-func _sync_material() -> void:
-	var shader_material := material as ShaderMaterial
-	if shader_material == null:
-		return
-	var box: Vector2 = _map_box()
-	shader_material.set_shader_parameter(&"rect_size", box)
-	shader_material.set_shader_parameter(&"map_shape", 1 if shape == Shape.CIRCLE else 0)
-	shader_material.set_shader_parameter(&"corner_radius", corner_radius)
-	if not is_inside_tree():
-		return
-	# The world geometry is submitted with draw_set_transform_matrix(), so its
-	# vertices are not minimap-local by the time the mask shader sees them.
-	# FRAGCOORD is viewport-relative; provide this control's viewport rect for
-	# a clip that works for both transformed world lines and local markers.
-	var canvas_transform: Transform2D = get_global_transform_with_canvas()
-	var canvas_scale: Vector2 = canvas_transform.get_scale().abs()
-	shader_material.set_shader_parameter(&"screen_rect_position", canvas_transform.origin)
-	shader_material.set_shader_parameter(&"screen_rect_size", box * canvas_scale)
-
-
 # --- Geometry sources -----------------------------------------------------
 
 ## Rebuilds the cached shapes. Sources can call this after changing their
@@ -293,6 +270,80 @@ static func map_transform(
 	return Transform2D(map_rotation, Vector2.ONE * map_scale, 0.0, origin)
 
 
+# --- Clipping -------------------------------------------------------------
+
+## Convex polygon approximating a circle, used to clip map geometry.
+static func circle_polygon(
+	center: Vector2, radius: float, segments: int = BORDER_SEGMENTS
+) -> PackedVector2Array:
+	var polygon := PackedVector2Array()
+	var count: int = maxi(segments, 3)
+	if radius <= 0.0:
+		return polygon
+	polygon.resize(count)
+	for index: int in range(count):
+		var angle: float = TAU * float(index) / float(count)
+		polygon[index] = center + Vector2(cos(angle), sin(angle)) * radius
+	return polygon
+
+
+## Convex polygon for a (rounded) rectangle whose top-left corner is at the origin.
+static func rounded_rect_polygon(
+	size_px: Vector2, radius_px: float, segments_per_corner: int = CORNER_SEGMENTS
+) -> PackedVector2Array:
+	var box := Vector2(maxf(size_px.x, 0.0), maxf(size_px.y, 0.0))
+	if box.x <= 0.0 or box.y <= 0.0:
+		return PackedVector2Array()
+	var radius: float = clampf(radius_px, 0.0, minf(box.x, box.y) * 0.5)
+	if radius <= 0.0:
+		return PackedVector2Array([
+			Vector2.ZERO,
+			Vector2(box.x, 0.0),
+			Vector2(box.x, box.y),
+			Vector2(0.0, box.y),
+		])
+	var steps: int = maxi(segments_per_corner, 1)
+	var corners: Array[Vector2] = [
+		Vector2(box.x - radius, radius),
+		Vector2(box.x - radius, box.y - radius),
+		Vector2(radius, box.y - radius),
+		Vector2(radius, radius),
+	]
+	var start_angles: Array[float] = [-PI * 0.5, 0.0, PI * 0.5, PI]
+	var polygon := PackedVector2Array()
+	for corner_index: int in range(corners.size()):
+		var corner_center: Vector2 = corners[corner_index]
+		var start_angle: float = start_angles[corner_index]
+		for step: int in range(steps + 1):
+			var angle: float = start_angle + (PI * 0.5) * float(step) / float(steps)
+			polygon.append(corner_center + Vector2(cos(angle), sin(angle)) * radius)
+	return polygon
+
+
+## Clip polygon in map-local pixels for the current shape and inset.
+##
+## An empty result means the rectangular control clip (clip_contents) already
+## does the job. Strokes pass half their width as the inset so the stroke's
+## outer edge lands on the border instead of spilling past it.
+func _clip_polygon(inset_px: float) -> PackedVector2Array:
+	var box: Vector2 = _map_box()
+	if shape == Shape.CIRCLE:
+		return circle_polygon(box * 0.5, minf(box.x, box.y) * 0.5 - inset_px)
+	if corner_radius <= 0.0:
+		return PackedVector2Array()
+	var inner := box - Vector2.ONE * (inset_px * 2.0)
+	if inner.x <= 0.0 or inner.y <= 0.0:
+		return PackedVector2Array()
+	var polygon: PackedVector2Array = rounded_rect_polygon(
+		inner, maxf(corner_radius - inset_px, 0.0)
+	)
+	if inset_px <= 0.0:
+		return polygon
+	for index: int in range(polygon.size()):
+		polygon[index] += Vector2.ONE * inset_px
+	return polygon
+
+
 func _world_scale(box: Vector2) -> float:
 	var radius_px: float = minf(box.x, box.y) * 0.5
 	var world_radius_px: float = Units.m_to_px(maxf(world_radius_m, MIN_WORLD_RADIUS_M))
@@ -327,8 +378,8 @@ func _on_viewport_resized() -> void:
 # --- Drawing --------------------------------------------------------------
 
 func _draw() -> void:
-	_sync_material()
-	draw_rect(Rect2(Vector2.ZERO, _map_box()), background_color)
+	var box: Vector2 = _map_box()
+	_draw_background(box)
 	var player: Node2D = _resolve_target()
 	if player != null:
 		_draw_geometry(player)
@@ -337,6 +388,21 @@ func _draw() -> void:
 	else:
 		_draw_placeholder()
 	_draw_border()
+
+
+func _draw_background(box: Vector2) -> void:
+	if shape == Shape.CIRCLE:
+		var radius: float = minf(box.x, box.y) * 0.5
+		if radius <= 0.0:
+			return
+		draw_circle(box * 0.5, radius, background_color, true, -1.0, true)
+		return
+	if corner_radius <= 0.0:
+		draw_rect(Rect2(Vector2.ZERO, box), background_color)
+		return
+	var polygon: PackedVector2Array = rounded_rect_polygon(box, corner_radius)
+	if polygon.size() >= 3:
+		draw_colored_polygon(polygon, background_color)
 
 
 func _resolve_target() -> Node2D:
@@ -359,29 +425,111 @@ func _draw_geometry(player: Node2D) -> void:
 	if map_scale <= 0.0:
 		return
 	var center: Vector2 = box * 0.5
-	draw_set_transform_matrix(
-		map_transform(player.global_position, map_scale, _map_rotation(player), center)
+	var transform: Transform2D = map_transform(
+		player.global_position, map_scale, _map_rotation(player), center
 	)
+	# Fills reach the border; strokes stop half a line short so their outer
+	# edge lands on it instead of spilling over.
+	var fill_clip: PackedVector2Array = _clip_polygon(0.0)
+	var stroke_clip: PackedVector2Array = _clip_polygon(line_width_px * 0.5)
 	for geometry: MinimapGeometry in _geometry:
 		if geometry.points.size() < 2 or not _is_geometry_revealed(geometry):
 			continue
 		var color: Color = _geometry_color(geometry)
+		var local_points: PackedVector2Array = _to_local(geometry.points, transform)
 		if geometry.filled and geometry.points.size() >= 3:
-			draw_colored_polygon(geometry.points, color)
+			_draw_filled_geometry(local_points, color, fill_clip)
 			continue
-		draw_polyline(_closed_points(geometry), color, line_width_px / map_scale, true)
-	draw_set_transform_matrix(Transform2D.IDENTITY)
+		_draw_line_geometry(local_points, geometry.closed, color, stroke_clip)
 
 
-func _closed_points(geometry: MinimapGeometry) -> PackedVector2Array:
-	var points: PackedVector2Array = geometry.points
-	if not geometry.closed or points.size() < 3:
+func _draw_filled_geometry(
+	points: PackedVector2Array, color: Color, clip: PackedVector2Array
+) -> void:
+	if clip.is_empty():
+		draw_colored_polygon(points, color)
+		return
+	if not _intersects_clip(points, clip, 0.0):
+		return
+	if _is_inside_clip(points, clip):
+		draw_colored_polygon(points, color)
+		return
+	var parts: Array[PackedVector2Array] = Geometry2D.intersect_polygons(points, clip)
+	for part: PackedVector2Array in parts:
+		if part.size() >= 3:
+			draw_colored_polygon(part, color)
+
+
+func _draw_line_geometry(
+	points: PackedVector2Array, closed: bool, color: Color, clip: PackedVector2Array
+) -> void:
+	var line: PackedVector2Array = _closed_line(points, closed)
+	if clip.is_empty():
+		draw_polyline(line, color, line_width_px, true)
+		return
+	var half_width: float = line_width_px * 0.5
+	if not _intersects_clip(line, clip, half_width):
+		return
+	if _is_inside_clip(line, clip):
+		draw_polyline(line, color, line_width_px, true)
+		return
+	var parts: Array[PackedVector2Array] = Geometry2D.intersect_polyline_with_polygon(line, clip)
+	for part: PackedVector2Array in parts:
+		if part.size() >= 2:
+			draw_polyline(part, color, line_width_px, true)
+
+
+static func _to_local(points: PackedVector2Array, transform: Transform2D) -> PackedVector2Array:
+	var local_points := PackedVector2Array()
+	local_points.resize(points.size())
+	for index: int in range(points.size()):
+		local_points[index] = transform * points[index]
+	return local_points
+
+
+static func _closed_line(points: PackedVector2Array, closed: bool) -> PackedVector2Array:
+	if not closed or points.size() < 3:
 		return points
 	if points[0].is_equal_approx(points[points.size() - 1]):
 		return points
 	var loop: PackedVector2Array = points.duplicate()
 	loop.append(points[0])
 	return loop
+
+
+static func _points_bounds(points: PackedVector2Array) -> Rect2:
+	if points.is_empty():
+		return Rect2()
+	var bounds := Rect2(points[0], Vector2.ZERO)
+	for index: int in range(1, points.size()):
+		bounds = bounds.expand(points[index])
+	return bounds
+
+
+## Cheap reject for geometry nowhere near the clip polygon.
+static func _intersects_clip(
+	points: PackedVector2Array, clip: PackedVector2Array, margin_px: float
+) -> bool:
+	if points.is_empty() or clip.size() < 3:
+		return false
+	return _points_bounds(points).grow(margin_px).intersects(_points_bounds(clip), true)
+
+
+## Both clip shapes are convex, so an AABB is inside when its four corners are.
+static func _is_inside_clip(points: PackedVector2Array, clip: PackedVector2Array) -> bool:
+	if points.is_empty() or clip.size() < 3:
+		return false
+	var bounds: Rect2 = _points_bounds(points)
+	var corners: Array[Vector2] = [
+		bounds.position,
+		Vector2(bounds.end.x, bounds.position.y),
+		bounds.end,
+		Vector2(bounds.position.x, bounds.end.y),
+	]
+	for corner: Vector2 in corners:
+		if not Geometry2D.is_point_in_polygon(corner, clip):
+			return false
+	return true
 
 
 func _draw_entities(player: Node2D) -> void:
@@ -448,6 +596,11 @@ func _draw_border() -> void:
 		if radius <= 0.0:
 			return
 		draw_arc(box * 0.5, radius, 0.0, TAU, BORDER_SEGMENTS, border_color, border_width_px, true)
+	elif corner_radius > 0.0:
+		var outline: PackedVector2Array = rounded_rect_polygon(box, corner_radius)
+		if outline.size() >= 3:
+			outline.append(outline[0])
+			draw_polyline(outline, border_color, border_width_px, true)
 	else:
 		draw_rect(Rect2(Vector2.ZERO, box), border_color, false, border_width_px)
 

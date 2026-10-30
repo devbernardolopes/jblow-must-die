@@ -44,8 +44,7 @@ This game is currently being developed and it is in very early stages. No one is
 - `MinimapSource` points are local to the node, so the shape follows its parent transform. Call `notify_minimap_changed()` after mutating points at runtime.
 - Fog of war is the `MinimapVisibility` resource assigned to `Minimap.visibility`; `null` reveals everything. `is_explored` is persistent (walls and areas stay revealed), `is_visible_now` is transient (other entities only show while in view). Implement fog by subclassing it, not by editing the renderer.
 - `Minimap.Corner` had to be named `MapCorner`: Godot 4.7 has a global `Corner` type that shadows a local enum of the same name and breaks parsing.
-- Circular/rounded clipping is `shaders/minimap_mask.gdshader`. It captures `VERTEX` in `vertex()` because `VERTEX`/`FRAGCOORD` are screen space in `fragment()` and break under canvas stretch.
-- Headless mode cannot compile the shader; verify it by loading the `Shader` and reading `get_shader_uniform_list()`.
+- Circular/rounded clipping happens in `Minimap._draw_geometry()`: world points are transformed to map-local pixels and clipped with `Geometry2D.intersect_polyline_with_polygon` / `intersect_polygons` against a generated circle or rounded-rectangle polygon. There is no clip shader; do not reintroduce one.
 
 ## Testing
 

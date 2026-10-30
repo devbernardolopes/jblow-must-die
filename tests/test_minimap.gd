@@ -44,7 +44,9 @@ func _run() -> void:
 	_test_visibility()
 	_test_wall_geometry()
 	_test_source_geometry()
-	_test_mask_shader()
+	_test_clip_polygons()
+	_test_geometry_clipping()
+	_test_rectangle_clip_polygon()
 	await _test_late_source_registration()
 	if _failures == 0:
 		print("Minimap tests: PASS")
@@ -276,21 +278,153 @@ func _test_late_source_registration() -> void:
 	minimap.free()
 
 
-func _test_mask_shader() -> void:
-	var shader := load("res://shaders/minimap_mask.gdshader") as Shader
-	_assert(shader != null, "minimap mask shader loads")
-	if shader == null:
-		return
-	var uniforms: Array = shader.get_shader_uniform_list()
-	_assert(_has_shader_uniform(uniforms, &"screen_rect_position"), "mask uses screen rectangle position")
-	_assert(_has_shader_uniform(uniforms, &"screen_rect_size"), "mask uses screen rectangle size")
+func _test_clip_polygons() -> void:
+	var center := Vector2(100.0, 100.0)
+	var radius := 90.0
+	var circle: PackedVector2Array = Minimap.circle_polygon(center, radius, 64)
+	_assert(circle.size() == 64, "circle clip has the requested segment count")
+	var on_radius: bool = true
+	for point: Vector2 in circle:
+		if absf(point.distance_to(center) - radius) > 0.01:
+			on_radius = false
+			break
+	_assert(on_radius, "circle clip points sit on the radius")
+	_assert(Geometry2D.is_point_in_polygon(center, circle), "circle clip contains its centre")
+	_assert(
+		not Geometry2D.is_point_in_polygon(center + Vector2(radius + 5.0, 0.0), circle),
+		"circle clip rejects points outside"
+	)
+	_assert(Minimap.circle_polygon(center, 0.0).is_empty(), "zero-radius circle clip is empty")
+
+	var rounded: PackedVector2Array = Minimap.rounded_rect_polygon(Vector2(200.0, 200.0), 40.0, 8)
+	_assert(rounded.size() > 4, "rounded rectangle clip is a polygon")
+	_assert(
+		Geometry2D.is_point_in_polygon(Vector2(100.0, 100.0), rounded),
+		"rounded rectangle contains its centre"
+	)
+	_assert(
+		not Geometry2D.is_point_in_polygon(Vector2(1.0, 1.0), rounded),
+		"rounded rectangle cuts its corners"
+	)
+	_assert(
+		Geometry2D.is_point_in_polygon(Vector2(100.0, 5.0), rounded),
+		"rounded rectangle keeps its edges"
+	)
+	var square: PackedVector2Array = Minimap.rounded_rect_polygon(Vector2(200.0, 200.0), 0.0)
+	_assert(square.size() == 4, "zero radius rectangle clip stays a quad")
+	_assert(
+		Geometry2D.is_point_in_polygon(Vector2(1.0, 1.0), square),
+		"zero radius rectangle keeps its corners"
+	)
 
 
-func _has_shader_uniform(uniforms: Array, uniform_name: StringName) -> bool:
-	for value: Variant in uniforms:
-		if value is Dictionary and value.get(&"name", StringName()) == uniform_name:
-			return true
-	return false
+func _test_geometry_clipping() -> void:
+	var minimap := _make_minimap()
+	minimap.shape = Minimap.Shape.CIRCLE
+	minimap.line_width_px = 2.0
+	var box: Vector2 = minimap._map_box()
+	var center: Vector2 = box * 0.5
+	var radius: float = minf(box.x, box.y) * 0.5
+	var clip: PackedVector2Array = minimap._clip_polygon(0.0)
+	var stroke_clip: PackedVector2Array = minimap._clip_polygon(minimap.line_width_px * 0.5)
+	_assert(not clip.is_empty(), "circle shape builds a clip polygon")
+	_assert(not stroke_clip.is_empty(), "circle shape builds an inset stroke clip")
+
+	var inside := PackedVector2Array([
+		center - Vector2(20.0, 0.0), center + Vector2(20.0, 0.0)
+	])
+	var inside_parts: Array[PackedVector2Array] = Geometry2D.intersect_polyline_with_polygon(
+		inside, stroke_clip
+	)
+	_assert(
+		is_equal_approx(_polyline_length(inside_parts), 40.0),
+		"inside segment survives clipping"
+	)
+
+	var crossing := PackedVector2Array([
+		center - Vector2(200.0, 0.0), center + Vector2(200.0, 0.0)
+	])
+	var crossing_parts: Array[PackedVector2Array] = Geometry2D.intersect_polyline_with_polygon(
+		crossing, stroke_clip
+	)
+	_assert(not crossing_parts.is_empty(), "crossing segment is clipped, not dropped")
+	var crossing_inside: bool = true
+	for part: PackedVector2Array in crossing_parts:
+		for point: Vector2 in part:
+			if point.distance_to(center) > radius + 0.01:
+				crossing_inside = false
+	_assert(crossing_inside, "clipped segment stays inside the circle")
+	_assert(
+		_polyline_length(crossing_parts) < 400.0,
+		"crossing segment is shortened"
+	)
+
+	var outside := PackedVector2Array([
+		center + Vector2(200.0, 0.0), center + Vector2(220.0, 0.0)
+	])
+	_assert(
+		Geometry2D.intersect_polyline_with_polygon(outside, stroke_clip).is_empty(),
+		"outside segment is culled"
+	)
+
+	var full := PackedVector2Array([
+		center - Vector2(300.0, 300.0),
+		center + Vector2(300.0, -300.0),
+		center + Vector2(300.0, 300.0),
+	])
+	var filled_parts: Array[PackedVector2Array] = Geometry2D.intersect_polygons(full, clip)
+	_assert(not filled_parts.is_empty(), "filled area is clipped")
+	var fill_inside: bool = true
+	for part: PackedVector2Array in filled_parts:
+		for point: Vector2 in part:
+			if point.distance_to(center) > radius + 0.01:
+				fill_inside = false
+	_assert(fill_inside, "clipped fill stays inside the circle")
+
+	_assert(
+		Minimap._is_inside_clip(
+			PackedVector2Array([center - Vector2(5.0, 5.0), center + Vector2(5.0, 5.0)]), clip
+		),
+		"small geometry uses the inside fast path"
+	)
+	_assert(
+		not Minimap._is_inside_clip(crossing, clip),
+		"crossing geometry skips the inside fast path"
+	)
+	minimap.free()
+
+
+func _test_rectangle_clip_polygon() -> void:
+	var minimap := _make_minimap()
+	minimap.shape = Minimap.Shape.RECTANGLE
+	minimap.corner_radius = 0.0
+	_assert(minimap._clip_polygon(0.0).is_empty(), "square shape relies on clip_contents")
+	minimap.corner_radius = 24.0
+	var clip: PackedVector2Array = minimap._clip_polygon(0.0)
+	_assert(not clip.is_empty(), "rounded rectangle builds a clip polygon")
+	_assert(
+		Minimap._is_inside_clip(
+			PackedVector2Array([Vector2(90.0, 90.0), Vector2(110.0, 110.0)]), clip
+		),
+		"rounded rectangle keeps geometry near its centre"
+	)
+	var inset: PackedVector2Array = minimap._clip_polygon(4.0)
+	_assert(not inset.is_empty(), "rounded rectangle builds an inset stroke clip")
+	_assert(
+		not Minimap._is_inside_clip(
+			PackedVector2Array([Vector2(-10.0, 100.0), Vector2(210.0, 100.0)]), clip
+		),
+		"rounded rectangle clips geometry crossing its border"
+	)
+	minimap.free()
+
+
+func _polyline_length(parts: Array[PackedVector2Array]) -> float:
+	var total: float = 0.0
+	for part: PackedVector2Array in parts:
+		for index: int in range(1, part.size()):
+			total += part[index - 1].distance_to(part[index])
+	return total
 
 
 func _make_minimap() -> Minimap:
