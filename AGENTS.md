@@ -18,6 +18,16 @@ This game is currently being developed and it is in very early stages. No one is
 - No commented-out dead code (git keeps history).
 - Don't choose names for local variables that will shadow anything else (properties, methods, etc). Prefix with underscore if needed.
 
+## Controls
+
+- `Entity` never reads `Input`. Controllers translate devices into movement intent, action requests, weapon switches and aim.
+- `RELATIVE` mode: A/D turns the entity at `turn_rate_rad_s`, W/S drives throttle. `OMNI` mode faces the movement direction.
+- Cursor aim is additive to the existing controls: `PlayerController` requests it on mouse motion in `RELATIVE` mode, and `Entity` applies it as an instant facing/rotation change. It never touches velocity or throttle.
+- While the mouse is moving, cursor aim wins over A/D. Once the mouse is still, A/D turns normally again.
+- Cursor aim obeys the same gates as movement: `locked`, `is_staggered()` and movement-locking actions discard the request instead of queueing it.
+- Aiming while standing still is not movement, so the idle animation stays. `OMNI` mode ignores cursor aim.
+- Aim requests are read once per physics tick through `EntityController.consume_aim_direction()`; a controller must never expose state that accumulates while gated.
+
 ## Animation Authoring
 
 - Visuals are data-driven through `EntityAnimationSet` resources. A set has a stable `id`, one `SpriteFrames`, and the `idle`/`move` animation names.
@@ -38,7 +48,7 @@ This game is currently being developed and it is in very early stages. No one is
 ## Minimap Authoring
 
 - The minimap lives in `scenes/minimap.tscn` and is instanced under `Hud` in `scenes/world.tscn`. `Hud.target` feeds it the centred player.
-- It is an immediate-mode `Control`: one `_draw()` with `draw_set_transform_matrix()`, no SubViewport or second camera. Do not add per-frame point math to keep the player centred; the transform does that.
+- It is an immediate-mode `Control`: one `_draw()`, no SubViewport or second camera. `Minimap.map_transform()` converts world points to map-local pixels once per frame so the player lands on the centre.
 - Anything on the map joins the `minimap_source` group and implements `get_minimap_geometry() -> Array[MinimapGeometry]`, returning shapes in **global world pixels**. `Wall` does this from its `Curve2D` centerline; `MinimapSource` does it for authored doors, areas and points of interest.
 - Add a new map feature by adding a `MinimapGeometry.Kind`, a default color export on `Minimap`, and a source that emits it. Do not special-case drawing per node type.
 - `MinimapSource` points are local to the node, so the shape follows its parent transform. Call `notify_minimap_changed()` after mutating points at runtime.
@@ -66,6 +76,7 @@ godot --headless --path . --script res://tests/test_animation_resources.gd
 godot --headless --path . --script res://tests/test_entity_animation_integration.gd
 godot --headless --path . --script res://tests/test_weapon_system.gd
 godot --headless --path . --script res://tests/test_projectiles.gd
+godot --headless --path . --script res://tests/test_player_controller.gd
 godot --headless --path . --script res://tests/test_minimap.gd
 ```
 

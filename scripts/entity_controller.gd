@@ -26,6 +26,11 @@ func wants_run() -> bool:
 func get_action_request() -> StringName:
 	return &""
 
+## World-space direction the controller wants the entity to face this frame.
+## Vector2.ZERO means "no cursor aim"; keyboard/analog turning still applies.
+func consume_aim_direction() -> Vector2:
+	return Vector2.ZERO
+
 ## -1 selects the previous weapon, +1 the next one, 0 leaves it alone.
 func get_weapon_switch() -> int:
 	return 0

@@ -378,6 +378,10 @@ func is_staggered() -> bool:
 func _physics_process(delta: float) -> void:
 	if Engine.is_editor_hint():
 		return
+	# Consume every tick so aim requests cannot pile up while locked.
+	var aim_direction: Vector2 = Vector2.ZERO
+	if controller != null:
+		aim_direction = controller.consume_aim_direction()
 	if locked:
 		velocity = Vector2.ZERO
 		_inertia_velocity_mps = Vector2.ZERO
@@ -394,13 +398,15 @@ func _physics_process(delta: float) -> void:
 	_try_controller_action()
 	_update_footstep(delta)
 	var intent: Vector2 = _get_intent()
+	var movement_locked: bool = animator != null and animator.locks_movement()
+	if is_staggered() or movement_locked:
+		aim_direction = Vector2.ZERO
 	var is_moving: bool = not is_staggered() and not intent.is_zero_approx()
-	#push_warning("is_moving: %s" %is_moving)
-	if animator != null and animator.locks_movement():
+	if movement_locked:
 		intent = Vector2.ZERO
 	var move_mode: EntityController.MovementMode = controller.movement_mode
 	if move_mode == EntityController.MovementMode.RELATIVE:
-		_resolve_relative(delta, intent)
+		_resolve_relative(delta, intent, aim_direction)
 	else:
 		_resolve_omni(delta, intent)
 	_decay_inertia(delta)
@@ -453,18 +459,33 @@ func look_toward(direction: Vector2, delta: float) -> void:
 	facing = direction.normalized()
 	rotation = lerp_angle(rotation, facing.angle(), minf(1.0, delta * TURN_RATE))
 
-func _resolve_relative(delta: float, intent: Vector2) -> void:
+## Cursor aim wins when present; otherwise A/D turns in place.
+## Returns true while aiming so the visual can snap instead of easing.
+func _apply_relative_rotation(
+	delta: float, turn_input: float, turn_rate_rad_s: float, aim_direction: Vector2
+) -> bool:
+	if not aim_direction.is_zero_approx():
+		facing = aim_direction.normalized()
+		rotation = facing.angle()
+		return true
+	if absf(turn_input) > 0.001:
+		facing = facing.rotated(turn_input * maxf(turn_rate_rad_s, 0.0) * delta)
+	return false
+
+func _resolve_relative(delta: float, intent: Vector2, aim_direction: Vector2) -> void:
 	var move_intent: Vector2 = Vector2.ZERO
 	if not is_staggered():
 		move_intent = intent.limit_length(1.0)
 	var turn_input: float = move_intent.x
 	var throttle_input: float = move_intent.y
-	if absf(turn_input) > 0.001:
-		var turn_rate: float = controller.turn_rate_rad_s
-		if turn_rate < 0.0:
-			turn_rate = 0.0
-		facing = facing.rotated(turn_input * turn_rate * delta)
-	if visual != null and (absf(turn_input) > 0.001 or absf(throttle_input) > 0.001):
+	var aiming: bool = _apply_relative_rotation(
+		delta, turn_input, controller.turn_rate_rad_s, aim_direction
+	)
+	if (
+		not aiming
+		and visual != null
+		and (absf(turn_input) > 0.001 or absf(throttle_input) > 0.001)
+	):
 		look_toward(facing, delta)
 	var speed_mps: float = data.run_speed_mps if controller.wants_run() else data.walk_speed_mps
 	var move_speed_factor: float = 1.0

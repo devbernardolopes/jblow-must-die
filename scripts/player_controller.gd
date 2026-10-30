@@ -2,7 +2,20 @@ class_name PlayerController
 extends EntityController
 ## Reads the shared movement actions, so keyboard, gamepad, and touch all work.
 
+## Cursor aim turns the entity in RELATIVE mode while the mouse is moving.
+@export var mouse_aim_enabled: bool = true
+
 @onready var _entity: Entity = get_parent() as Entity
+
+var _aim_pending: bool = false
+
+func _input(event: InputEvent) -> void:
+	if not mouse_aim_enabled or movement_mode != MovementMode.RELATIVE:
+		return
+	var motion := event as InputEventMouseMotion
+	if motion == null or motion.relative.is_zero_approx():
+		return
+	_aim_pending = true
 
 func get_move_vector() -> Vector2:
 	return Input.get_vector("move_left", "move_right", "move_up", "move_down")
@@ -11,6 +24,21 @@ func get_move_intent() -> Vector2:
 	var x: float = Input.get_axis("move_left", "move_right")
 	var y: float = Input.get_axis("move_down", "move_up")
 	return Vector2(x, y)
+
+## Returns the world direction to the cursor once, then clears the request.
+func consume_aim_direction() -> Vector2:
+	var was_pending: bool = _aim_pending
+	_aim_pending = false
+	if not was_pending or not mouse_aim_enabled:
+		return Vector2.ZERO
+	if movement_mode != MovementMode.RELATIVE:
+		return Vector2.ZERO
+	if _entity == null or not is_instance_valid(_entity) or not _entity.is_inside_tree():
+		return Vector2.ZERO
+	var offset: Vector2 = _entity.get_global_mouse_position() - _entity.global_position
+	if offset.is_zero_approx():
+		return Vector2.ZERO
+	return offset.normalized()
 
 func wants_run() -> bool:
 	return Input.is_action_pressed("run")
