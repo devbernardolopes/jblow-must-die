@@ -3,7 +3,7 @@ class_name Entity
 extends CharacterBody2D
 
 const TURN_RATE: float = 16.0
-const COLLISION_RADIUS_M: float = 3.0
+const COLLISION_RADIUS_M: float = 4.0
 ## How aligned the movement intent must be with the contact normal to push.
 const PUSH_INTENT_DOT: float = 0.25
 const PUSH_REJECT_INTERVAL_MS: int = 1500
@@ -592,3 +592,8 @@ func _configure_collision_shape() -> void:
 	circle.radius = Units.m_to_px(COLLISION_RADIUS_M)
 	collision.position = Vector2.ONE * collision_offset
 	collision.debug_color = Color.from_hsv(0.4, 0.9, 0.3, 0.5)
+
+func take_damage(amount: float, _source: Node) -> void:
+	push_warning(self, " takes ", amount, " damage")
+	pass
+	#damage_taken += amount

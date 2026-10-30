@@ -19,6 +19,5 @@ script = ExtResource("1_data")
 sprite_frames = Array[SpriteFrames]([SubResource("SpriteFrames_37qwj")])
 animation = &"fly"
 lifetime = 1.2
-radius = 3.5
 damage = 50.0
 pierce = 1

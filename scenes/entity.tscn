@@ -2,9 +2,9 @@
 
 [ext_resource type="Script" uid="uid://0yh2bjs84b32" path="res://scripts/entity.gd" id="1_iiwub"]
 
-[node name="Entity" type="CharacterBody2D" unique_id=2144108584]
+[node name="Entity" type="CharacterBody2D" unique_id=2144108584 node_paths=PackedStringArray("muzzle")]
 collision_layer = 2
 collision_mask = 7
 motion_mode = 1
 script = ExtResource("1_iiwub")
-collision_offset = null
+muzzle = NodePath("Muzzle")

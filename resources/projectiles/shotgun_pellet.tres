@@ -21,4 +21,4 @@ animation = &"fly"
 placeholder_color = Color(1, 0.75, 0.5, 1)
 speed = 4500.0
 lifetime = 0.45
-damage = 2.5
+damage = 5.0

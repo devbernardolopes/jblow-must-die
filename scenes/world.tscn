@@ -101,6 +101,20 @@ _data = {
 }
 point_count = 6
 
+[sub_resource type="Curve2D" id="Curve2D_navra"]
+bake_interval = 8.0
+_data = {
+"points": PackedVector2Array(0, 0, 0, 0, 1008.9238, 1773.6377, 0, 0, 0, 0, 5335.924, 3156.6377, 0, 0, 0, 0, 6348.924, 4014.6377, 0, 0, 0, 0, 6880.924, 5193.6377, 0, 0, 0, 0, 6769.924, 6555.6377)
+}
+point_count = 5
+
+[sub_resource type="Curve2D" id="Curve2D_luhhm"]
+bake_interval = 8.0
+_data = {
+"points": PackedVector2Array(0, 0, 0, 0, 1110.2891, 1584.0029, 0, 0, 0, 0, 2057.289, 348.00293, 0, 0, 0, 0, 4085.289, 348.00293, 0, 0, 0, 0, 4062.289, 2213.003, 0, 0, 0, 0, 1086.2891, 2181.003, 0, 0, 0, 0, 1100.2891, 1971.0029)
+}
+point_count = 6
+
 [node name="World" type="Node2D" unique_id=1936967746]
 
 [node name="Terrain" type="Node2D" parent="." unique_id=263962426]
@@ -108,7 +122,7 @@ point_count = 6
 [node name="Polygon2D" type="Polygon2D" parent="Terrain" unique_id=438616211]
 texture_repeat = 2
 texture = ExtResource("1_munwf")
-polygon = PackedVector2Array(2261, 6387, 8299, 1649, 23512, 2206, 48934, 4227, 66761, 47611, 10843, 39836)
+polygon = PackedVector2Array(2261, 6387, 8299, 1649, 23512, 2206, 48934, 4227, 55486, 29913, 10843, 39836)
 metadata/_edit_lock_ = true
 
 [node name="Decals" type="Node2D" parent="." unique_id=2112393720]
@@ -143,7 +157,7 @@ collision_mask = 7
 motion_mode = 1
 script = ExtResource("1_rwgxs")
 data = ExtResource("5_e3hyu")
-collision_offset = Vector2(-32, 12)
+collision_offset = Vector2(-36, 12)
 current_weapon = ExtResource("8_pm21f")
 available_weapons = Array[ExtResource("6_7t5mc")]([ExtResource("8_pm21f")])
 team = &"enemy"
@@ -151,14 +165,14 @@ muzzle = NodePath("Muzzle")
 metadata/_custom_type_script = "uid://0yh2bjs84b32"
 
 [node name="Hero" type="CharacterBody2D" parent="Entities" unique_id=1469266724 node_paths=PackedStringArray("muzzle")]
-position = Vector2(10664, 10675)
+position = Vector2(15223.896, 15406.44)
 collision_layer = 2
 collision_mask = 7
 motion_mode = 1
 script = ExtResource("1_rwgxs")
 data = ExtResource("2_4wyf3")
 speed_multiplier = 3.0
-collision_offset = Vector2(-15, 15)
+collision_offset = Vector2(-48, 18)
 current_weapon = ExtResource("10_7iits")
 available_weapons = Array[ExtResource("6_7t5mc")]([ExtResource("7_lakw3"), ExtResource("10_7iits"), ExtResource("12_0nbtd"), ExtResource("13_37qwj"), ExtResource("14_37qwj")])
 muzzle = NodePath("@Marker2D@19829")
@@ -182,11 +196,18 @@ scale = Vector2(0.8630898, 0.5677797)
 occluder = SubResource("OccluderPolygon2D_m7uww")
 
 [node name="PointLight2D" type="PointLight2D" parent="Entities/Hero" unique_id=903313644]
+color = Color(0.9882353, 0.9882353, 0.9882353, 0.6745098)
+energy = 0.75
 shadow_enabled = true
+shadow_filter = 1
 texture = ExtResource("25_xgqkh")
+offset = Vector2(128, 36)
+texture_scale = 0.7
 metadata/_edit_lock_ = true
 
 [node name="Projectiles" type="Node2D" parent="." unique_id=825104731 groups=["projectiles_root"]]
+
+[node name="Doors" type="Node2D" parent="." unique_id=1318891429]
 
 [node name="Walls" type="Node2D" parent="." unique_id=1513112567]
 script = ExtResource("5_w7kh3")
@@ -258,10 +279,32 @@ texture = ExtResource("16_2lf6f")
 side_texture = ExtResource("17_7iits")
 metadata/_custom_type_script = "uid://cwq11bwr8h2h8"
 
+[node name="Wall6" type="Path2D" parent="Walls/InnerWalls" unique_id=953365406]
+texture_repeat = 2
+position = Vector2(7095.076, 12490.362)
+curve = SubResource("Curve2D_navra")
+script = ExtResource("4_71j4m")
+disable_editor = true
+texture = ExtResource("16_2lf6f")
+side_texture = ExtResource("17_7iits")
+metadata/_custom_type_script = "uid://cwq11bwr8h2h8"
+
+[node name="Wall7" type="Path2D" parent="Walls/InnerWalls" unique_id=1299184540]
+texture_repeat = 2
+position = Vector2(12408.002, 14058.002)
+rotation = -0.0708135
+curve = SubResource("Curve2D_luhhm")
+script = ExtResource("4_71j4m")
+disable_editor = true
+texture = ExtResource("16_2lf6f")
+texture_mode = 2
+side_texture = ExtResource("17_7iits")
+metadata/_custom_type_script = "uid://cwq11bwr8h2h8"
+
 [node name="Canopy" type="Node2D" parent="." unique_id=1016076990]
 
 [node name="FollowCamera" type="Camera2D" parent="." unique_id=787066361 node_paths=PackedStringArray("target")]
-position = Vector2(10664, 10675)
+position = Vector2(15223.896, 15406.44)
 zoom = Vector2(0.4000009, 0.4000009)
 process_callback = 0
 position_smoothing_enabled = true
