@@ -20,4 +20,3 @@ sprite_frames = Array[SpriteFrames]([SubResource("SpriteFrames_37qwj")])
 animation = &"fly"
 lifetime = 1.2
 damage = 50.0
-pierce = 1

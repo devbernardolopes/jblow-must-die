@@ -339,6 +339,16 @@ func _fire() -> void:
 	var start: float = -spread_rad * 0.5
 	var pellet_damage: float = current_weapon.get_projectile_damage()
 	_consume_ammo(current_weapon)
+	if current_weapon.spent_shell:
+		var spent_shell_sprite: Sprite2D = Sprite2D.new()
+		spent_shell_sprite.texture = current_weapon.spent_shell
+		spent_shell_sprite.scale = Vector2.ONE * 0.4
+		# TODO: Spawn empty spent shell as a child of World/Objects
+		# Use math to animate it rotating and being ejected (add another Marker2D per weapon that can eject spent shell to have the origin point)
+		# Rotation and ejection must have some sort of randomness at the start
+		# Rotation loses energy and so does the eject speed
+		# Make it persist on the "ground" (World/Objects node)
+		
 	if current_weapon.shoot_stream:
 		_play_world_sound(origin, current_weapon.shoot_stream)
 	for index: int in range(count):

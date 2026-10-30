@@ -21,6 +21,7 @@ extends Resource
 ## Muzzle position in sprite pixels, relative to the entity origin.
 @export var muzzle_offset: Vector2 = Vector2.ZERO
 @export var red_dot_enabled: bool = false
+@export var spent_shell: Texture2D = null
 
 @export_category("Animation actions")
 ## Action id resolved against the equipped animation set when attacking.
