@@ -41,7 +41,10 @@ signal action_triggered(action_id: StringName)
 		_reload_weapon = null
 		_refresh_animation_set()
 
+@export_category("Payload")
 @export var available_weapons: Array[WeaponData] = []
+@export var inventory: Array[ItemData] = []
+
 ## Used by projectiles to avoid damaging entities on the same side.
 @export var team: StringName = &""
 ## Node projectiles spawn from; positioned from the equipped weapon's muzzle_offset.
@@ -72,6 +75,9 @@ var _reload_weapon: WeaponData = null
 ## Cached AudioManager autoload; resolved at runtime so headless scripts can load this class.
 var _audio_manager: Node = null
 
+var _red_dot: Line2D = null
+var _red_dot_ray_cast: RayCast2D = null
+
 func _ready() -> void:
 	_refresh_animation_set()
 	_configure_collision_shape()
@@ -82,6 +88,8 @@ func _ready() -> void:
 		if interaction == null:
 			interaction = Area2D.new()
 			add_child(interaction)
+		_sort_available_weapons()
+			
 	motion_mode = CharacterBody2D.MOTION_MODE_FLOATING
 	collision_layer = PhysicsLayers.ENTITIES
 	collision_mask = PhysicsLayers.WORLD | PhysicsLayers.ENTITIES | PhysicsLayers.OBJECTS
@@ -385,6 +393,13 @@ func get_inertia_velocity_mps() -> Vector2:
 func is_staggered() -> bool:
 	return _inertia_velocity_mps.length() > INERTIA_CONTROL_SPEED_MPS
 
+func _get_inventory_item(_item: StringName) -> ItemData:
+	if inventory and not inventory.is_empty():
+		for i in inventory.size():
+			if inventory[i].id == _item:
+				return inventory[i]
+	return null
+
 func _physics_process(delta: float) -> void:
 	if Engine.is_editor_hint():
 		return
@@ -407,6 +422,59 @@ func _physics_process(delta: float) -> void:
 	_try_weapon_switch()
 	_try_controller_action()
 	_update_footstep(delta)
+
+	if not Engine.is_editor_hint():
+		var _item: ItemData = _get_inventory_item(&"red_dot_handgun")
+		
+		if _item:
+			if _item.usable_on_weapons.has(current_weapon.name):
+				current_weapon.red_dot_enabled = true
+				
+				if not _red_dot:
+					var _node = get_node_or_null("/root/World/Projectiles")
+
+					_red_dot_ray_cast = RayCast2D.new()
+					_red_dot_ray_cast.enabled = true
+					_red_dot_ray_cast.exclude_parent = true
+					_red_dot_ray_cast.collision_mask = PhysicsLayers.WORLD | PhysicsLayers.ENTITIES | PhysicsLayers.OBJECTS
+					_red_dot_ray_cast.collide_with_areas = true
+					_red_dot_ray_cast.collide_with_bodies = true
+					_red_dot_ray_cast.target_position = Vector2.RIGHT * 4250.0
+
+					if _node and not _node.get_children().has(_red_dot_ray_cast):
+						_node.add_child(_red_dot_ray_cast)
+					
+					_red_dot = Line2D.new()
+					_red_dot.default_color = Color.RED
+					_red_dot.width = 2.0
+					
+					if _node and not _node.get_children().has(_red_dot):
+						_node.add_child(_red_dot)
+				
+				_red_dot_ray_cast.global_transform = muzzle.global_transform
+				_red_dot.global_transform = muzzle.global_transform
+				
+				_red_dot.clear_points()
+				
+				if _red_dot_ray_cast.is_colliding():
+					_red_dot.add_point(Vector2.ZERO)
+					_red_dot.add_point(_red_dot.to_local(_red_dot_ray_cast.get_collision_point()))
+				else:
+					_red_dot.add_point(Vector2.ZERO)
+					_red_dot.add_point(Vector2.RIGHT * 4250.0)
+					
+				
+			else:
+				if _red_dot_ray_cast:
+					_red_dot_ray_cast.queue_free()
+				if _red_dot:
+					_red_dot.queue_free()
+		else:
+			if _red_dot_ray_cast:
+				_red_dot_ray_cast.queue_free()
+			if _red_dot:
+				_red_dot.queue_free()
+	
 	var intent: Vector2 = _get_intent()
 	var movement_locked: bool = animator != null and animator.locks_movement()
 	if is_staggered() or movement_locked:
@@ -604,6 +672,10 @@ func _configure_collision_shape() -> void:
 	collision.debug_color = Color.from_hsv(0.4, 0.9, 0.3, 0.5)
 
 func take_damage(amount: float, _source: Node) -> void:
-	push_warning(self, " takes ", amount, " damage")
+	#push_warning(self, " takes ", amount, " damage")
 	pass
 	#damage_taken += amount
+
+func _sort_available_weapons() -> void:
+	if available_weapons and not available_weapons.is_empty():
+		available_weapons.sort_custom(func(a, b): return a.sort_order > b.sort_order)

@@ -1,0 +1,12 @@
+[gd_resource type="Resource" script_class="ItemData" format=3 uid="uid://cy76rhdrb5hox"]
+
+[ext_resource type="Script" uid="uid://cmkgcvkcxkvn4" path="res://resources/item_data.gd" id="1_3yfbx"]
+
+[resource]
+script = ExtResource("1_3yfbx")
+id = &"handgun_magazine"
+name = "Handgun Magazine"
+consumable = true
+usable_on_weapons = Array[StringName]([&"handgun"])
+internal_amount = 12
+metadata/_custom_type_script = "uid://cmkgcvkcxkvn4"

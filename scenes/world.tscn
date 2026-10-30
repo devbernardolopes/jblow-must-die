@@ -19,12 +19,14 @@
 [ext_resource type="Resource" uid="uid://bp0cqsl0kkg3k" path="res://resources/weapons/handgun_weapon.tres" id="7_lakw3"]
 [ext_resource type="Resource" uid="uid://j26o6wdfa204" path="res://resources/weapons/hands_weapon.tres" id="8_pm21f"]
 [ext_resource type="Resource" uid="uid://c3hie3old5k53" path="res://resources/weapons/shotgun_weapon.tres" id="10_7iits"]
-[ext_resource type="Resource" uid="uid://dcgqgimnkh3ng" path="res://resources/weapons/flashlight_weapon.tres" id="12_0nbtd"]
 [ext_resource type="Script" uid="uid://b3paqdjyulegx" path="res://scripts/audio_listener_2d.gd" id="12_kpybi"]
 [ext_resource type="Resource" uid="uid://dkgwsb5a2ewhx" path="res://resources/weapons/rifle_weapon.tres" id="13_37qwj"]
 [ext_resource type="Resource" uid="uid://d10ww2re3j5wu" path="res://resources/weapons/knife_weapon.tres" id="14_37qwj"]
 [ext_resource type="Texture2D" uid="uid://dhe54wkpq15r2" path="res://assets/images/textures/mtl_g01metaltrim02.png" id="16_2lf6f"]
 [ext_resource type="Texture2D" uid="uid://d3p2lfsxj7y5c" path="res://assets/images/textures/mtl_g01greymetal05.png" id="17_7iits"]
+[ext_resource type="Script" uid="uid://cmkgcvkcxkvn4" path="res://resources/item_data.gd" id="17_rup4s"]
+[ext_resource type="Resource" uid="uid://bcvwdktaiqit2" path="res://resources/items/red_dot_handgun_item.tres" id="18_4kbfs"]
+[ext_resource type="Resource" uid="uid://cy76rhdrb5hox" path="res://resources/items/handgun_magazine_item.tres" id="19_4kbfs"]
 [ext_resource type="Texture2D" uid="uid://cmo1ci7owt0q5" path="res://assets/images/textures/mtl_g01rustmetal01.png" id="20_oo54l"]
 [ext_resource type="Script" uid="uid://cl0j1kino70ie" path="res://scripts/hud.gd" id="23_kpybi"]
 [ext_resource type="Texture2D" uid="uid://dvk2xbu842241" path="res://assets/images/projectiles/bullet.png" id="24_ctatt"]
@@ -141,6 +143,12 @@ position = Vector2(15397, 15292)
 scale = Vector2(0.4, 0.4)
 texture = ExtResource("4_luhhm")
 
+[node name="RayCast2D" type="RayCast2D" parent="Decals" unique_id=2019927145]
+visible = false
+position = Vector2(15351, 15464)
+target_position = Vector2(50, 0)
+collision_mask = 7
+
 [node name="Objects" type="Node2D" parent="." unique_id=504264520]
 
 [node name="Crate" parent="Objects" unique_id=414730064 instance=ExtResource("4_munwf")]
@@ -157,7 +165,9 @@ rotation = 0.5131268
 [node name="Entities" type="Node2D" parent="." unique_id=1738183308]
 y_sort_enabled = true
 
-[node name="Zombie" type="CharacterBody2D" parent="Entities" unique_id=1722025293 node_paths=PackedStringArray("muzzle")]
+[node name="Enemies" type="Node2D" parent="Entities" unique_id=1998480042]
+
+[node name="Zombie" type="CharacterBody2D" parent="Entities/Enemies" unique_id=1722025293 node_paths=PackedStringArray("muzzle")]
 position = Vector2(11597.471, 11597.126)
 collision_layer = 2
 collision_mask = 7
@@ -167,8 +177,19 @@ data = ExtResource("5_e3hyu")
 collision_offset = Vector2(-36, 12)
 current_weapon = ExtResource("8_pm21f")
 available_weapons = Array[ExtResource("6_7t5mc")]([ExtResource("8_pm21f")])
+inventory = null
 team = &"enemy"
 muzzle = NodePath("Muzzle")
+metadata/_custom_type_script = "uid://0yh2bjs84b32"
+
+[node name="Entity" type="CharacterBody2D" parent="Entities/Enemies" unique_id=317838120]
+position = Vector2(15978.158, 15119.592)
+collision_layer = 2
+collision_mask = 7
+motion_mode = 1
+script = ExtResource("1_rwgxs")
+data = ExtResource("5_e3hyu")
+team = &"enemy"
 metadata/_custom_type_script = "uid://0yh2bjs84b32"
 
 [node name="Hero" type="CharacterBody2D" parent="Entities" unique_id=1469266724 node_paths=PackedStringArray("muzzle")]
@@ -181,8 +202,9 @@ data = ExtResource("2_4wyf3")
 speed_multiplier = 3.0
 collision_offset = Vector2(-48, 18)
 current_weapon = ExtResource("7_lakw3")
-available_weapons = Array[ExtResource("6_7t5mc")]([ExtResource("7_lakw3"), ExtResource("10_7iits"), ExtResource("12_0nbtd"), ExtResource("13_37qwj"), ExtResource("14_37qwj")])
-muzzle = NodePath("@Marker2D@19827")
+available_weapons = Array[ExtResource("6_7t5mc")]([ExtResource("7_lakw3"), ExtResource("10_7iits"), ExtResource("13_37qwj"), ExtResource("14_37qwj")])
+inventory = Array[ExtResource("17_rup4s")]([ExtResource("18_4kbfs"), ExtResource("19_4kbfs")])
+muzzle = NodePath("@Marker2D@19829")
 metadata/_custom_type_script = "uid://0yh2bjs84b32"
 
 [node name="PlayerController" type="Node" parent="Entities/Hero" unique_id=385327029]

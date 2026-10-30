@@ -14,6 +14,7 @@ base_damage = 20.0
 cooldown_period = 0.75
 ammo_amount = 6
 hotkey = &"weapon_02"
+sort_order = 2
 projectile = ExtResource("2_pellet")
 projectile_count = 8
 spread_degrees = 22.0

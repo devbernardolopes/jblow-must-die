@@ -10,6 +10,7 @@ extends Resource
 ## Magazine capacity for guns; 0 means unlimited.
 @export var ammo_amount: int = 0
 @export var hotkey: StringName = &""
+@export var sort_order: int = 0
 
 @export_category("Projectiles")
 ## Projectile spawned by guns; ignored by melee weapons.

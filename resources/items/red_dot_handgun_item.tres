@@ -1,0 +1,10 @@
+[gd_resource type="Resource" script_class="ItemData" format=3 uid="uid://bcvwdktaiqit2"]
+
+[ext_resource type="Script" uid="uid://cmkgcvkcxkvn4" path="res://resources/item_data.gd" id="1_os6th"]
+
+[resource]
+script = ExtResource("1_os6th")
+id = &"red_dot_handgun"
+name = "Red Dot for Handgun"
+usable_on_weapons = Array[StringName]([&"handgun"])
+metadata/_custom_type_script = "uid://cmkgcvkcxkvn4"
