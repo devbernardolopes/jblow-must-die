@@ -526,8 +526,8 @@ static func _is_inside_clip(points: PackedVector2Array, clip: PackedVector2Array
 		bounds.end,
 		Vector2(bounds.position.x, bounds.end.y),
 	]
-	for corner: Vector2 in corners:
-		if not Geometry2D.is_point_in_polygon(corner, clip):
+	for _corner: Vector2 in corners:
+		if not Geometry2D.is_point_in_polygon(_corner, clip):
 			return false
 	return true
 
