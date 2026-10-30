@@ -25,6 +25,7 @@ This game is currently being developed and it is in very early stages. No one is
 - `EntityAnimator` is the only animation state machine, and it has exactly three states: `IDLE`, `MOVE`, `ACTION`. Do not add more states for individual attacks; those are one-shot actions.
 - Every animation in the set that is not `idle`/`move` is auto-registered as an action under its own name. Add an `EntityAnimationAction` only when the defaults need changing: `id`, `animation`, `locks_movement`, `priority`, `trigger_frame`.
 - Actions lock movement by default. Set `locks_movement = false` only for actions that should allow locomotion.
+- A dry shot (attack action with an empty magazine) still plays its action, but as a non-locking overlay: `Entity.try_action()` requests it with `lock_movement = false` and skips the cooldown in both directions. The animation duration alone gates retriggering; real shots keep their movement lock and cooldown.
 - `trigger_frame` is when gameplay happens (shots, hits, sounds). Keep timing in the animation resource and handle it in `Entity.action_triggered` instead of in controllers.
 - `idle` and `move` must loop (`loop = 1`); action animations must not loop.
 - Controllers never drive animations directly. They return an action id from `get_action_request()`; `Entity.try_action()` handles cooldown gating and the animator handles playback.

@@ -25,6 +25,8 @@ var _current_action_id: StringName = &""
 var _action_time_left: float = 0.0
 var _trigger_fired: bool = false
 var _moving: bool = false
+## Movement lock for the running action instance; may be overridden per request.
+var _current_action_locks_movement: bool = false
 var _warned: Dictionary[String, bool] = {}
 
 func bind(sprite: AnimatedSprite2D) -> void:
@@ -69,7 +71,9 @@ func tick(delta: float, moving: bool) -> void:
 		return
 	_play_locomotion()
 
-func request_action(action_id: StringName) -> bool:
+## Starts an action. `lock_movement` is combined with the action's own flag, so a
+## dry shot can play the attack animation as a moving overlay.
+func request_action(action_id: StringName, lock_movement: bool = true) -> bool:
 	if _sprite == null or _animation_set == null:
 		return false
 	var next_action := _actions.get(action_id) as EntityAnimationAction
@@ -82,7 +86,7 @@ func request_action(action_id: StringName) -> bool:
 	if state == State.ACTION and _current_action != null:
 		if next_action.priority <= _current_action.priority:
 			return false
-	_start_action(next_action)
+	_start_action(next_action, lock_movement)
 	return true
 
 func cancel_action() -> void:
@@ -94,8 +98,7 @@ func is_busy() -> bool:
 	return state == State.ACTION
 
 func locks_movement() -> bool:
-	# TODO: Don't lock movement if player fires but there is not ammo (dry)
-	return state == State.ACTION and _current_action != null and _current_action.locks_movement
+	return state == State.ACTION and _current_action_locks_movement
 
 func get_state() -> State:
 	return state
@@ -149,9 +152,10 @@ func _play_locomotion() -> void:
 		return
 	_sprite.play(target_animation)
 
-func _start_action(action: EntityAnimationAction) -> void:
+func _start_action(action: EntityAnimationAction, lock_movement: bool) -> void:
 	_current_action = action
 	_current_action_id = action.id
+	_current_action_locks_movement = lock_movement and action.locks_movement
 	state = State.ACTION
 	_trigger_fired = false
 	_action_time_left = _animation_duration(action.animation)
@@ -164,6 +168,7 @@ func _finish_action() -> void:
 	var finished_id: StringName = _current_action_id
 	_current_action = null
 	_current_action_id = &""
+	_current_action_locks_movement = false
 	state = State.IDLE
 	if not finished_id.is_empty():
 		action_finished.emit(finished_id)

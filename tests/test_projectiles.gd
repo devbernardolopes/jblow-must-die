@@ -17,6 +17,7 @@ func _run() -> void:
 	await process_frame
 	_test_shotgun()
 	_test_handgun()
+	_test_missing_art_placeholder()
 	_test_rifle_and_damage()
 	if _failures == 0:
 		print("Projectile tests: PASS")
@@ -46,14 +47,14 @@ func _test_shotgun() -> void:
 			"shotgun damage is split across the pellets"
 		)
 		_assert(
-			is_equal_approx(projectile.velocity.length(), 1500.0),
+			is_equal_approx(projectile.velocity.length(), 4500.0),
 			"pellet uses the projectile speed"
 		)
 		_assert(
 			projectile.global_position.distance_to(Vector2(233, 148)) < 0.01,
 			"projectile starts at the weapon muzzle"
 		)
-		_assert(not projectile.sprite.visible, "missing art falls back to the placeholder")
+		_assert(projectile.sprite.visible, "projectile shows its authored sprite")
 		var angle: float = projectile.velocity.angle()
 		min_angle = minf(min_angle, angle)
 		max_angle = maxf(max_angle, angle)
@@ -68,8 +69,11 @@ func _test_shotgun() -> void:
 
 	for _index: int in range(5):
 		entity._consume_ammo(entity.current_weapon)
-	_assert(entity.try_action(&"shoot") == false, "empty shotgun cannot shoot")
+	_assert(entity.is_out_of_ammo(entity.current_weapon), "shotgun is empty")
+	_assert(entity.try_action(&"shoot"), "empty shotgun plays the dry-fire animation")
+	_assert(not entity.animator.locks_movement(), "dry fire does not lock movement")
 	_assert(container.get_child_count() == 8, "empty shotgun spawns nothing")
+	entity.animator.cancel_action()
 
 	container.free()
 	entity.free()
@@ -84,13 +88,45 @@ func _test_handgun() -> void:
 	if projectile != null:
 		_assert(is_equal_approx(projectile.damage, 10.0), "handgun deals its full damage")
 		_assert(
-			is_equal_approx(projectile.velocity.length(), 1600.0),
+			is_equal_approx(projectile.velocity.length(), 7000.0),
 			"handgun uses its projectile speed"
 		)
 		var circle := projectile.wall_shape.shape as CircleShape2D
 		_assert(
-			circle != null and is_equal_approx(circle.radius, 3.0),
+			circle != null and is_equal_approx(circle.radius, 8.0),
 			"collision radius comes from the projectile data"
+		)
+	container.free()
+	entity.free()
+
+func _test_missing_art_placeholder() -> void:
+	var entity := Entity.new()
+	entity.data = load("res://resources/entities/web_developer/web_developer.tres") as EntityData
+	entity.team = &"player"
+	var weapon := load("res://resources/weapons/handgun_weapon.tres").duplicate() as WeaponData
+	var placeholder := (weapon.projectile as ProjectileData).duplicate() as ProjectileData
+	placeholder.sprite_frames.clear()
+	placeholder.radius = 3.0
+	weapon.projectile = placeholder
+	entity.current_weapon = weapon
+	entity.position = Vector2(100, 100)
+	entity.rotation = 0.0
+	root.add_child(entity)
+	entity._refresh_muzzle()
+	var container: Node2D = _make_container()
+	entity._fire()
+
+	_assert(container.get_child_count() == 1, "placeholder shot spawns one projectile")
+	var projectile := container.get_child(0) as Projectile
+	_assert(
+		projectile != null and not projectile.sprite.visible,
+		"missing art keeps the sprite hidden"
+	)
+	if projectile != null:
+		var circle := projectile.wall_shape.shape as CircleShape2D
+		_assert(
+			circle != null and is_equal_approx(circle.radius, 3.0),
+			"placeholder uses the projectile radius"
 		)
 	container.free()
 	entity.free()

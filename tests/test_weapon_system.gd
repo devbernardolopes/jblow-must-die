@@ -17,6 +17,7 @@ func _init() -> void:
 	_test_add_and_remove()
 	_test_ammo()
 	_test_per_weapon_cooldown()
+	_test_dry_fire()
 	if _failures == 0:
 		print("Weapon system tests: PASS")
 		quit(0)
@@ -80,29 +81,48 @@ func _test_add_and_remove() -> void:
 func _test_ammo() -> void:
 	var entity := _make_entity([&"handgun"], &"handgun")
 	var handgun := entity.current_weapon
-	_assert(entity.get_ammo(handgun) == 12, "ammo starts at magazine capacity")
+	var capacity: int = entity.get_ammo_capacity(handgun)
+	_assert(entity.get_ammo(handgun) == capacity, "ammo starts at magazine capacity")
 	_assert(entity.try_action(&"shoot"), "shoot starts with ammo")
 	entity._on_animator_action_triggered(&"shoot")
-	_assert(entity.get_ammo(handgun) == 11, "shooting consumes one round")
+	_assert(entity.get_ammo(handgun) == capacity - 1, "shooting consumes one round")
 	entity.animator.cancel_action()
 
 	_assert(entity.try_action(&"reload"), "reload starts when not full")
 	entity._on_animator_action_triggered(&"reload")
-	_assert(entity.get_ammo(handgun) == 12, "reload trigger refills the magazine")
+	_assert(entity.get_ammo(handgun) == capacity, "reload trigger refills the magazine")
 	entity.animator.cancel_action()
 	_assert(not entity.try_action(&"reload"), "reload is refused when full")
 
-	for _index: int in range(12):
+	for _index: int in range(capacity):
 		entity._consume_ammo(handgun)
 	_assert(entity.is_out_of_ammo(handgun), "gun is empty after consuming every round")
-	_assert(not entity.try_action(&"shoot"), "shooting is refused when empty")
 	_assert(entity.try_action(&"reload"), "empty gun can still reload")
 	entity._on_animator_action_triggered(&"reload")
-	_assert(entity.get_ammo(handgun) == 12, "reload refills an empty magazine")
+	_assert(entity.get_ammo(handgun) == capacity, "reload refills an empty magazine")
 	entity.animator.cancel_action()
 
 	var knife := _load_weapon(&"knife")
 	_assert(not entity.is_out_of_ammo(knife), "melee weapons never run out of ammo")
+	entity.free()
+
+func _test_dry_fire() -> void:
+	var entity := _make_entity([&"handgun"], &"handgun")
+	var handgun := entity.current_weapon
+	handgun.cooldown_period = 10.0
+	for _index: int in range(entity.get_ammo_capacity(handgun)):
+		entity._consume_ammo(handgun)
+	_assert(entity.is_out_of_ammo(handgun), "gun is empty before the dry fire")
+	_assert(entity.try_action(&"shoot"), "dry fire still plays the shoot animation")
+	_assert(entity.animator.is_busy(), "dry fire is busy")
+	_assert(not entity.animator.locks_movement(), "dry fire does not lock movement")
+	_assert(not entity.try_action(&"shoot"), "dry fire cannot retrigger mid-animation")
+	entity.animator.cancel_action()
+	_assert(entity.try_action(&"shoot"), "dry fire does not write a cooldown")
+	entity.animator.cancel_action()
+
+	entity.current_weapon = _load_weapon(&"knife")
+	_assert(entity.try_action(&"melee_attack"), "melee attack starts")
 	entity.free()
 
 func _test_per_weapon_cooldown() -> void:

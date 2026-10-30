@@ -69,6 +69,8 @@ var _action_ready_msec: Dictionary[StringName, int] = {}
 var _ammo_by_weapon: Dictionary[StringName, int] = {}
 ## Weapon whose reload is currently playing, so its trigger refills the right gun.
 var _reload_weapon: WeaponData = null
+## Cached AudioManager autoload; resolved at runtime so headless scripts can load this class.
+var _audio_manager: Node = null
 
 func _ready() -> void:
 	_refresh_animation_set()
@@ -245,18 +247,21 @@ func is_out_of_ammo(weapon: WeaponData) -> bool:
 	return get_ammo(weapon) <= 0
 
 ## Attempts to start an animation action; returns whether it started.
+##
+## A dry shot (attack action with an empty magazine) still plays its animation,
+## but as a movement-unlocked overlay and without touching the cooldown. Its
+## own animation duration is then the only retrigger gate.
 func try_action(action_id: StringName) -> bool:
-	# TODO: Don't enforce cooldown period if player fires but there is not ammo (dry)
-	#push_warning("action_id: %s" % action_id)
 	if animator == null or not _can_start_action(action_id):
 		return false
+	var dry_fire: bool = _is_dry_fire(action_id)
 	var now: int = Time.get_ticks_msec()
 	var cooldown_key: StringName = _cooldown_key(current_weapon, action_id)
-	if now < _action_ready_msec.get(cooldown_key, 0):
+	if not dry_fire and now < _action_ready_msec.get(cooldown_key, 0):
 		return false
-	if not animator.request_action(action_id):
+	if not animator.request_action(action_id, not dry_fire):
 		return false
-	if current_weapon == null:
+	if current_weapon == null or dry_fire:
 		return true
 	if action_id == current_weapon.reload_action:
 		_reload_weapon = current_weapon
@@ -264,12 +269,17 @@ func try_action(action_id: StringName) -> bool:
 		_action_ready_msec[cooldown_key] = now + int(ceilf(current_weapon.cooldown_period * 1000.0))
 	return true
 
+## True when attacking would only click because the magazine is empty.
+func _is_dry_fire(action_id: StringName) -> bool:
+	if current_weapon == null or action_id != current_weapon.attack_action:
+		return false
+	return is_out_of_ammo(current_weapon)
+
 func _can_start_action(action_id: StringName) -> bool:
 	if current_weapon == null:
 		return true
 	if action_id == current_weapon.attack_action:
-		return current_weapon.can_shoot()
-		#return not (current_weapon.can_shoot() and is_out_of_ammo(current_weapon))
+		return true
 	if action_id == current_weapon.reload_action:
 		if not current_weapon.can_reload():
 			return false
@@ -292,9 +302,20 @@ func _refill_ammo(weapon: WeaponData) -> void:
 	if weapon == null or capacity <= 0:
 		return
 	if weapon.reload_stream:
-		# TODO: 
-		AudioManager.play_at(global_position / Units.PX_PER_METER, weapon.reload_stream)
+		_play_world_sound(global_position, weapon.reload_stream)
 	_ammo_by_weapon[weapon.name] = capacity
+
+## Plays a one-shot through the AudioManager autoload. The autoload is resolved
+## from the tree at runtime so headless `--script` runs (which have no autoload
+## identifiers) can still load this script.
+func _play_world_sound(position_px: Vector2, stream: AudioStream) -> void:
+	if stream == null or not is_inside_tree():
+		return
+	if _audio_manager == null or not is_instance_valid(_audio_manager):
+		_audio_manager = get_node_or_null(^"/root/AudioManager")
+	if _audio_manager == null:
+		return
+	_audio_manager.call(&"play_at", position_px / Units.PX_PER_METER, stream)
 
 ## Hook for spawning the weapon's projectile or hit effect.
 func _fire() -> void:
@@ -307,7 +328,7 @@ func _fire() -> void:
 
 	if is_out_of_ammo(current_weapon):
 		if current_weapon.dry_stream:
-			AudioManager.play_at(global_position / Units.PX_PER_METER, current_weapon.dry_stream)
+			_play_world_sound(global_position, current_weapon.dry_stream)
 		return
 	var forward: Vector2 = muzzle.global_transform.x.normalized()
 	if forward.is_zero_approx():
@@ -319,7 +340,7 @@ func _fire() -> void:
 	var pellet_damage: float = current_weapon.get_projectile_damage()
 	_consume_ammo(current_weapon)
 	if current_weapon.shoot_stream:
-		AudioManager.play_at(origin / Units.PX_PER_METER, current_weapon.shoot_stream)
+		_play_world_sound(origin, current_weapon.shoot_stream)
 	for index: int in range(count):
 		var direction: Vector2 = forward.rotated(start + step * float(index))
 		Projectile.spawn(current_weapon.projectile, origin, direction, self, pellet_damage)

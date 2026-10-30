@@ -5,6 +5,7 @@ var _failures: int = 0
 
 func _init() -> void:
 	_test_locomotion_and_actions()
+	_test_non_locking_action()
 	_test_priority()
 	_test_set_switch()
 	_test_locomotion_replay()
@@ -51,6 +52,43 @@ func _test_locomotion_and_actions() -> void:
 	animator.tick(0.11, true)
 	_assert(not animator.is_busy(), "action ends at the deadline")
 	_assert(animator.get_state() == EntityAnimator.State.MOVE, "returns to move after action")
+	sprite.free()
+
+func _test_non_locking_action() -> void:
+	var sprite := AnimatedSprite2D.new()
+	var animation_set := _make_set(&"overlay")
+	var shoot := EntityAnimationAction.new()
+	shoot.id = &"shoot"
+	shoot.animation = &"shoot"
+	shoot.trigger_frame = 1
+	animation_set.actions = [shoot]
+	var animator := EntityAnimator.new()
+	animator.bind(sprite)
+	animator.apply_set(animation_set)
+	animator.tick(0.1, true)
+	_assert(sprite.animation == &"move", "starts from locomotion")
+
+	_assert(animator.request_action(&"shoot", false), "non-locking action starts")
+	_assert(animator.is_busy(), "non-locking action is busy")
+	_assert(not animator.locks_movement(), "non-locking action allows movement")
+	_assert(
+		not animator.request_action(&"shoot", false),
+		"non-locking action cannot retrigger mid-play"
+	)
+	animator.tick(0.1, true)
+	_assert(animator.get_state() == EntityAnimator.State.ACTION, "still in action while moving")
+	_assert(sprite.animation == &"shoot", "locomotion is suppressed during the action")
+
+	animator.tick(0.25, true)
+	_assert(not animator.is_busy(), "non-locking action ends with the animation")
+	_assert(animator.get_state() == EntityAnimator.State.MOVE, "returns to move after the action")
+	_assert(sprite.animation == &"move", "move animation resumes after the action")
+
+	_assert(animator.request_action(&"shoot", false), "second non-locking action starts")
+	animator.tick(0.1, false)
+	animator.tick(0.25, false)
+	_assert(animator.get_state() == EntityAnimator.State.IDLE, "returns to idle when not moving")
+	_assert(sprite.animation == &"idle", "idle animation resumes")
 	sprite.free()
 
 func _test_priority() -> void:
