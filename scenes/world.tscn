@@ -177,12 +177,11 @@ data = ExtResource("5_e3hyu")
 collision_offset = Vector2(-36, 12)
 current_weapon = ExtResource("8_pm21f")
 available_weapons = Array[ExtResource("6_7t5mc")]([ExtResource("8_pm21f")])
-inventory = null
 team = &"enemy"
 muzzle = NodePath("Muzzle")
 metadata/_custom_type_script = "uid://0yh2bjs84b32"
 
-[node name="Entity" type="CharacterBody2D" parent="Entities/Enemies" unique_id=317838120]
+[node name="Entity" type="CharacterBody2D" parent="Entities/Enemies" unique_id=317838120 node_paths=PackedStringArray("muzzle")]
 position = Vector2(15978.158, 15119.592)
 collision_layer = 2
 collision_mask = 7
@@ -190,6 +189,7 @@ motion_mode = 1
 script = ExtResource("1_rwgxs")
 data = ExtResource("5_e3hyu")
 team = &"enemy"
+muzzle = NodePath("Muzzle")
 metadata/_custom_type_script = "uid://0yh2bjs84b32"
 
 [node name="Hero" type="CharacterBody2D" parent="Entities" unique_id=1469266724 node_paths=PackedStringArray("muzzle")]
@@ -204,7 +204,7 @@ collision_offset = Vector2(-48, 18)
 current_weapon = ExtResource("7_lakw3")
 available_weapons = Array[ExtResource("6_7t5mc")]([ExtResource("7_lakw3"), ExtResource("10_7iits"), ExtResource("13_37qwj"), ExtResource("14_37qwj")])
 inventory = Array[ExtResource("17_rup4s")]([ExtResource("18_4kbfs"), ExtResource("19_4kbfs")])
-muzzle = NodePath("@Marker2D@19829")
+muzzle = NodePath("@Marker2D@20640")
 metadata/_custom_type_script = "uid://0yh2bjs84b32"
 
 [node name="PlayerController" type="Node" parent="Entities/Hero" unique_id=385327029]
