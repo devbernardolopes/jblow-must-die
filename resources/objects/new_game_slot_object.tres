@@ -1,0 +1,12 @@
+[gd_resource type="Resource" script_class="WorldObjectData" format=3 uid="uid://bdsf0cidevyke"]
+
+[ext_resource type="Script" uid="uid://cog0wbgn2dyrp" path="res://resources/world_object_data.gd" id="1_7tuwy"]
+[ext_resource type="Texture2D" uid="uid://5hj65qdponl2" path="res://assets/images/objects/button04.png" id="2_rxfuh"]
+
+[resource]
+script = ExtResource("1_7tuwy")
+id = &"new_game_slot"
+breakable = true
+obstacle = true
+visual = ExtResource("2_rxfuh")
+metadata/_custom_type_script = "uid://cog0wbgn2dyrp"

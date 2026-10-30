@@ -1,0 +1,18 @@
+[gd_scene format=3 uid="uid://b1sw3pic0adx7"]
+
+[ext_resource type="Script" uid="uid://dg67wx78jciax" path="res://scripts/world_object.gd" id="1_8xvqb"]
+[ext_resource type="Resource" uid="uid://bdsf0cidevyke" path="res://resources/objects/new_game_slot_object.tres" id="2_13sym"]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_m7uww"]
+size = Vector2(230, 86)
+
+[node name="NewGameSlot" type="CharacterBody2D" unique_id=1116064012]
+collision_layer = 4
+collision_mask = 15
+motion_mode = 1
+script = ExtResource("1_8xvqb")
+data = ExtResource("2_13sym")
+metadata/_custom_type_script = "uid://dg67wx78jciax"
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=1467627462]
+shape = SubResource("RectangleShape2D_m7uww")

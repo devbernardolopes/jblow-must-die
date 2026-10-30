@@ -20,6 +20,7 @@ extends Resource
 @export_range(0.0, 180.0) var spread_degrees: float = 0.0
 ## Muzzle position in sprite pixels, relative to the entity origin.
 @export var muzzle_offset: Vector2 = Vector2.ZERO
+@export var red_dot_enabled: bool = false
 
 @export_category("Animation actions")
 ## Action id resolved against the equipped animation set when attacking.

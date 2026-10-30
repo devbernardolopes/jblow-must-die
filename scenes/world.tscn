@@ -10,6 +10,7 @@
 [ext_resource type="Script" uid="uid://cwq11bwr8h2h8" path="res://scripts/wall.gd" id="4_71j4m"]
 [ext_resource type="PackedScene" uid="uid://d4a5mcj645qe4" path="res://scenes/objects/crate.tscn" id="4_munwf"]
 [ext_resource type="Resource" uid="uid://7b3w44xgatiu" path="res://resources/entities/zombies/zombie.tres" id="5_e3hyu"]
+[ext_resource type="PackedScene" uid="uid://b1sw3pic0adx7" path="res://scenes/objects/new_game_slot.tscn" id="5_navra"]
 [ext_resource type="Texture2D" uid="uid://cob4ubhuebdyg" path="res://assets/images/textures/mtl_g01metaltrim02b.png" id="5_qfnet"]
 [ext_resource type="Script" uid="uid://cg1uto20g3kh3" path="res://scripts/walls_helper.gd" id="5_w7kh3"]
 [ext_resource type="Script" uid="uid://bln4irpuvk00t" path="res://resources/weapon_data.gd" id="6_7t5mc"]
@@ -123,6 +124,14 @@ texture = ExtResource("3_kpybi")
 
 [node name="Crate" parent="Objects" unique_id=414730064 instance=ExtResource("4_munwf")]
 position = Vector2(14169, 10835)
+
+[node name="NewGameSlot" parent="Objects" unique_id=1116064012 instance=ExtResource("5_navra")]
+position = Vector2(14068, 10347)
+rotation = -0.38397244
+
+[node name="NewGameSlot2" parent="Objects" unique_id=1082075903 instance=ExtResource("5_navra")]
+position = Vector2(14740.501, 10599.436)
+rotation = 0.5131268
 
 [node name="Entities" type="Node2D" parent="." unique_id=1738183308]
 y_sort_enabled = true
