@@ -3,14 +3,18 @@ extends Node
 ## Base class for entity behavior. Subclasses provide movement intent and action requests.
 
 enum MovementMode {
+	## Screen-space eight-way movement; facing follows the movement direction.
 	OMNI,
+	## W/S throttle along the facing direction and A/D turn the entity.
 	RELATIVE,
+	## W/S throttle along facing, A/D strafe sideways, and the cursor sets facing.
+	RELATIVE_MOUSE,
 }
 
 @export var movement_mode: MovementMode = MovementMode.OMNI
 ## Rotation speed in radians per second when in RELATIVE movement mode.
 @export var turn_rate_rad_s: float = PI
-## Speed factor applied when moving backwards in RELATIVE movement mode.
+## Speed factor applied when moving backwards in a relative movement mode.
 @export var reverse_speed_factor: float = 0.5
 
 func get_move_vector() -> Vector2:

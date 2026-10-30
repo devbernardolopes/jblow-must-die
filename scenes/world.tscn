@@ -166,8 +166,7 @@ metadata/_custom_type_script = "uid://0yh2bjs84b32"
 
 [node name="PlayerController" type="Node" parent="Entities/Hero" unique_id=385327029]
 script = ExtResource("4_4mrxx")
-movement_mode = 1
-turn_rate_rad_s = 6.283
+movement_mode = 2
 metadata/_custom_type_script = "uid://fpy3d3ekenn8"
 
 [node name="AudioListener2D" type="AudioListener2D" parent="Entities/Hero" unique_id=1772571137]

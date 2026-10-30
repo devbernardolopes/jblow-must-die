@@ -21,11 +21,13 @@ This game is currently being developed and it is in very early stages. No one is
 ## Controls
 
 - `Entity` never reads `Input`. Controllers translate devices into movement intent, action requests, weapon switches and aim.
-- `RELATIVE` mode: A/D turns the entity at `turn_rate_rad_s`, W/S drives throttle. `OMNI` mode faces the movement direction.
-- Cursor aim is additive to the existing controls: `PlayerController` requests it on mouse motion in `RELATIVE` mode, and `Entity` applies it as an instant facing/rotation change. It never touches velocity or throttle.
-- While the mouse is moving, cursor aim wins over A/D. Once the mouse is still, A/D turns normally again.
+- `MovementMode.OMNI` moves in screen space and turns `facing` toward the movement direction.
+- `MovementMode.RELATIVE` keeps A/D as turning at `turn_rate_rad_s` and W/S as throttle along `facing`.
+- `MovementMode.RELATIVE_MOUSE` also throttles with W/S, but A/D strafes sideways instead: positive X is the entity's own right. The cursor is the only steering input, so the keyboard never rotates the entity.
+- Cursor aim is additive: `PlayerController` requests it on mouse motion in both relative modes, and `Entity` applies it as an instant `facing`/`rotation` change. It never touches velocity or throttle.
+- In `RELATIVE`, cursor aim wins while the mouse is moving; once it is still, A/D turns normally again. In `RELATIVE_MOUSE`, `rotation` is always kept equal to `facing`.
 - Cursor aim obeys the same gates as movement: `locked`, `is_staggered()` and movement-locking actions discard the request instead of queueing it.
-- Aiming while standing still is not movement, so the idle animation stays. `OMNI` mode ignores cursor aim.
+- `is_moving` comes from the controller's intent, so aiming while standing still keeps the idle animation while strafing plays the move animation. `OMNI` ignores cursor aim.
 - Aim requests are read once per physics tick through `EntityController.consume_aim_direction()`; a controller must never expose state that accumulates while gated.
 
 ## Animation Authoring

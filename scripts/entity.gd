@@ -404,11 +404,13 @@ func _physics_process(delta: float) -> void:
 	var is_moving: bool = not is_staggered() and not intent.is_zero_approx()
 	if movement_locked:
 		intent = Vector2.ZERO
-	var move_mode: EntityController.MovementMode = controller.movement_mode
-	if move_mode == EntityController.MovementMode.RELATIVE:
-		_resolve_relative(delta, intent, aim_direction)
-	else:
-		_resolve_omni(delta, intent)
+	match controller.movement_mode:
+		EntityController.MovementMode.RELATIVE:
+			_resolve_relative(delta, intent, aim_direction)
+		EntityController.MovementMode.RELATIVE_MOUSE:
+			_resolve_relative_mouse(delta, intent, aim_direction)
+		_:
+			_resolve_omni(delta, intent)
 	_decay_inertia(delta)
 	_tick_animator(delta, is_moving)
 
@@ -436,9 +438,9 @@ func _try_controller_action() -> void:
 func _get_intent() -> Vector2:
 	if controller == null:
 		return Vector2.ZERO
-	if controller.movement_mode == EntityController.MovementMode.RELATIVE:
-		return controller.get_move_intent()
-	return controller.get_move_vector()
+	if controller.movement_mode == EntityController.MovementMode.OMNI:
+		return controller.get_move_vector()
+	return controller.get_move_intent()
 
 func _resolve_omni(delta: float, intent: Vector2) -> void:
 	var move_vector: Vector2 = Vector2.ZERO
@@ -459,23 +461,43 @@ func look_toward(direction: Vector2, delta: float) -> void:
 	facing = direction.normalized()
 	rotation = lerp_angle(rotation, facing.angle(), minf(1.0, delta * TURN_RATE))
 
-## Cursor aim wins when present; otherwise A/D turns in place.
+## Snaps facing and the node rotation to the cursor. Returns false when idle.
+func _apply_aim(aim_direction: Vector2) -> bool:
+	if aim_direction.is_zero_approx():
+		return false
+	facing = aim_direction.normalized()
+	rotation = facing.angle()
+	return true
+
+## Cursor aim wins when present; otherwise A/D turns in place (RELATIVE only).
 ## Returns true while aiming so the visual can snap instead of easing.
 func _apply_relative_rotation(
 	delta: float, turn_input: float, turn_rate_rad_s: float, aim_direction: Vector2
 ) -> bool:
-	if not aim_direction.is_zero_approx():
-		facing = aim_direction.normalized()
-		rotation = facing.angle()
+	if _apply_aim(aim_direction):
 		return true
 	if absf(turn_input) > 0.001:
 		facing = facing.rotated(turn_input * maxf(turn_rate_rad_s, 0.0) * delta)
 	return false
 
+func _limited_intent(intent: Vector2) -> Vector2:
+	if is_staggered():
+		return Vector2.ZERO
+	return intent.limit_length(1.0)
+
+## Movement vector for RELATIVE_MOUSE: throttle along the facing direction plus
+## a sideways strafe. Positive `strafe_input` is the entity's own right side.
+static func relative_mouse_vector(
+	facing_direction: Vector2, strafe_input: float, throttle_input: float
+) -> Vector2:
+	var forward: Vector2 = facing_direction.normalized()
+	if forward.is_zero_approx():
+		forward = Vector2.RIGHT
+	var right: Vector2 = forward.rotated(PI * 0.5)
+	return (forward * throttle_input + right * strafe_input).limit_length(1.0)
+
 func _resolve_relative(delta: float, intent: Vector2, aim_direction: Vector2) -> void:
-	var move_intent: Vector2 = Vector2.ZERO
-	if not is_staggered():
-		move_intent = intent.limit_length(1.0)
+	var move_intent: Vector2 = _limited_intent(intent)
 	var turn_input: float = move_intent.x
 	var throttle_input: float = move_intent.y
 	var aiming: bool = _apply_relative_rotation(
@@ -487,15 +509,30 @@ func _resolve_relative(delta: float, intent: Vector2, aim_direction: Vector2) ->
 		and (absf(turn_input) > 0.001 or absf(throttle_input) > 0.001)
 	):
 		look_toward(facing, delta)
+	_drive_relative(facing * throttle_input, throttle_input)
+
+## Mouse-relative variant: the cursor is the only steering input, so A/D strafes
+## sideways instead of turning and the keyboard never rotates the entity.
+func _resolve_relative_mouse(_delta: float, intent: Vector2, aim_direction: Vector2) -> void:
+	var move_intent: Vector2 = _limited_intent(intent)
+	# Facing is cursor-driven in this mode, so the sprite must never lag it.
+	if not _apply_aim(aim_direction):
+		rotation = facing.angle()
+	var move_vector: Vector2 = relative_mouse_vector(facing, move_intent.x, move_intent.y)
+	_drive_relative(move_vector, move_intent.y)
+
+## Shared speed/velocity math for both relative modes. `move_vector` is already
+## limited to unit length; the reverse factor applies to backpedalling only.
+func _drive_relative(move_vector: Vector2, throttle_input: float) -> void:
 	var speed_mps: float = data.run_speed_mps if controller.wants_run() else data.walk_speed_mps
 	var move_speed_factor: float = 1.0
 	if throttle_input < 0.0:
-		var reverse_factor: float = controller.reverse_speed_factor
-		if reverse_factor < 0.0:
-			reverse_factor = 0.0
-		move_speed_factor = reverse_factor
-	var move_vector: Vector2 = facing * throttle_input
-	velocity = ((move_vector * Units.m_to_px(speed_mps * speed_multiplier * _terrain_speed_factor * move_speed_factor)) + Units.to_px(_inertia_velocity_mps))
+		move_speed_factor = maxf(controller.reverse_speed_factor, 0.0)
+	velocity = (
+		move_vector * Units.m_to_px(
+			speed_mps * speed_multiplier * _terrain_speed_factor * move_speed_factor
+		) + Units.to_px(_inertia_velocity_mps)
+	)
 	move_and_slide()
 	_push_contacts(move_vector)
 

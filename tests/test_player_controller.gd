@@ -1,7 +1,18 @@
 extends SceneTree
-## Headless checks for cursor aim and relative-mode turning. No gameplay scene.
+## Headless checks for cursor aim, relative turning and mouse-relative strafing.
+## No gameplay scene is started.
 
 var _failures: int = 0
+
+class FakeController extends EntityController:
+	var move_vector: Vector2 = Vector2.ZERO
+	var move_intent: Vector2 = Vector2.ZERO
+
+	func get_move_vector() -> Vector2:
+		return move_vector
+
+	func get_move_intent() -> Vector2:
+		return move_intent
 
 func _initialize() -> void:
 	_run()
@@ -10,6 +21,8 @@ func _run() -> void:
 	await process_frame
 	await _test_aim_request()
 	_test_relative_rotation()
+	_test_relative_mouse_vector()
+	_test_intent_selection()
 	if _failures == 0:
 		print("Player controller tests: PASS")
 		quit(0)
@@ -62,6 +75,14 @@ func _test_aim_request() -> void:
 		"OMNI mode ignores cursor aim"
 	)
 
+	controller.movement_mode = EntityController.MovementMode.RELATIVE_MOUSE
+	controller._input(motion)
+	_assert_vec(
+		controller.consume_aim_direction(),
+		Vector2.LEFT,
+		"RELATIVE_MOUSE also aims at the cursor"
+	)
+
 	controller.movement_mode = EntityController.MovementMode.RELATIVE
 	controller._input(motion)
 	controller.movement_mode = EntityController.MovementMode.OMNI
@@ -97,6 +118,64 @@ func _test_relative_rotation() -> void:
 	_assert(is_equal_approx(entity.rotation, 0.0), "no input leaves rotation untouched")
 
 	entity.free()
+
+func _test_relative_mouse_vector() -> void:
+	_assert_vec(
+		Entity.relative_mouse_vector(Vector2.RIGHT, 0.0, 1.0),
+		Vector2.RIGHT,
+		"throttle drives along the facing direction"
+	)
+	_assert_vec(
+		Entity.relative_mouse_vector(Vector2.RIGHT, 1.0, 0.0),
+		Vector2.DOWN,
+		"positive strafe is the entity's right side"
+	)
+	_assert_vec(
+		Entity.relative_mouse_vector(Vector2.RIGHT, -1.0, 0.0),
+		Vector2.UP,
+		"negative strafe is the entity's left side"
+	)
+	_assert_vec(
+		Entity.relative_mouse_vector(Vector2.DOWN, 1.0, 0.0),
+		Vector2.LEFT,
+		"strafe follows the facing direction"
+	)
+	_assert_vec(
+		Entity.relative_mouse_vector(Vector2.DOWN, 0.0, -1.0),
+		Vector2.UP,
+		"reverse throttle is opposite the facing direction"
+	)
+	var diagonal: Vector2 = Entity.relative_mouse_vector(Vector2.RIGHT, 1.0, 1.0)
+	_assert(is_equal_approx(diagonal.length(), 1.0), "diagonal input does not speed up movement")
+	_assert_vec(diagonal, Vector2(1.0, 1.0).normalized(), "diagonal input splits evenly")
+	_assert_vec(
+		Entity.relative_mouse_vector(Vector2.ZERO, 1.0, 0.0),
+		Vector2.DOWN,
+		"an unset facing falls back to east"
+	)
+	_assert(
+		Entity.relative_mouse_vector(Vector2.RIGHT, 0.0, 0.0).is_zero_approx(),
+		"no input means no movement"
+	)
+
+func _test_intent_selection() -> void:
+	var entity := Entity.new()
+	var controller := FakeController.new()
+	controller.move_vector = Vector2(1.0, 0.0)
+	controller.move_intent = Vector2(0.0, 1.0)
+	entity.controller = controller
+
+	controller.movement_mode = EntityController.MovementMode.OMNI
+	_assert_vec(entity._get_intent(), Vector2(1.0, 0.0), "OMNI reads the screen-space vector")
+
+	controller.movement_mode = EntityController.MovementMode.RELATIVE
+	_assert_vec(entity._get_intent(), Vector2(0.0, 1.0), "RELATIVE reads turn and throttle")
+
+	controller.movement_mode = EntityController.MovementMode.RELATIVE_MOUSE
+	_assert_vec(entity._get_intent(), Vector2(0.0, 1.0), "RELATIVE_MOUSE reads strafe and throttle")
+
+	entity.free()
+	controller.free()
 
 func _assert_vec(actual: Vector2, expected: Vector2, message: String) -> void:
 	_assert(

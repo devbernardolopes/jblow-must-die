@@ -2,7 +2,7 @@ class_name PlayerController
 extends EntityController
 ## Reads the shared movement actions, so keyboard, gamepad, and touch all work.
 
-## Cursor aim turns the entity in RELATIVE mode while the mouse is moving.
+## Cursor aim turns the entity while the mouse is moving in a relative mode.
 @export var mouse_aim_enabled: bool = true
 
 @onready var _entity: Entity = get_parent() as Entity
@@ -10,12 +10,19 @@ extends EntityController
 var _aim_pending: bool = false
 
 func _input(event: InputEvent) -> void:
-	if not mouse_aim_enabled or movement_mode != MovementMode.RELATIVE:
+	if not mouse_aim_enabled or not _uses_cursor_aim():
 		return
 	var motion := event as InputEventMouseMotion
 	if motion == null or motion.relative.is_zero_approx():
 		return
 	_aim_pending = true
+
+## Both relative modes steer with the cursor; OMNI follows movement instead.
+func _uses_cursor_aim() -> bool:
+	return (
+		movement_mode == MovementMode.RELATIVE
+		or movement_mode == MovementMode.RELATIVE_MOUSE
+	)
 
 func get_move_vector() -> Vector2:
 	return Input.get_vector("move_left", "move_right", "move_up", "move_down")
@@ -31,7 +38,7 @@ func consume_aim_direction() -> Vector2:
 	_aim_pending = false
 	if not was_pending or not mouse_aim_enabled:
 		return Vector2.ZERO
-	if movement_mode != MovementMode.RELATIVE:
+	if not _uses_cursor_aim():
 		return Vector2.ZERO
 	if _entity == null or not is_instance_valid(_entity) or not _entity.is_inside_tree():
 		return Vector2.ZERO
