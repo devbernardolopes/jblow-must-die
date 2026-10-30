@@ -1,0 +1,24 @@
+[remap]
+
+importer="wav"
+type="AudioStreamWAV"
+uid="uid://n4p2okpq0nsq"
+path="res://.godot/imported/Pop Clip In-SoundBible.com-583746573.wav-b522f120a6fc87a855d0afc0ec4e4ca0.sample"
+
+[deps]
+
+source_file="res://assets/sounds/weapons/handgun/Pop Clip In-SoundBible.com-583746573.wav"
+dest_files=["res://.godot/imported/Pop Clip In-SoundBible.com-583746573.wav-b522f120a6fc87a855d0afc0ec4e4ca0.sample"]
+
+[params]
+
+force/8_bit=false
+force/mono=false
+force/max_rate=false
+force/max_rate_hz=44100
+edit/trim=false
+edit/normalize=false
+edit/loop_mode=0
+edit/loop_begin=0
+edit/loop_end=-1
+compress/mode=2

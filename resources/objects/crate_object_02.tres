@@ -1,0 +1,13 @@
+[gd_resource type="Resource" script_class="WorldObjectData" format=3 uid="uid://d0v8u4vw0ki51"]
+
+[ext_resource type="Script" uid="uid://cog0wbgn2dyrp" path="res://resources/world_object_data.gd" id="1_svxtj"]
+[ext_resource type="Texture2D" uid="uid://bgxoj27t3en8l" path="res://assets/images/objects/crates_study_x2.png" id="2_vwf73"]
+
+[resource]
+script = ExtResource("1_svxtj")
+id = &"crate"
+breakable = true
+movable = true
+obstacle = true
+visual = ExtResource("2_vwf73")
+metadata/_custom_type_script = "uid://cog0wbgn2dyrp"

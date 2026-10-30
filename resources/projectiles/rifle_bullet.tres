@@ -1,12 +1,23 @@
 [gd_resource type="Resource" script_class="ProjectileData" format=3 uid="uid://jwdf1sl3rup"]
 
 [ext_resource type="Script" uid="uid://b3scc3g2aif3w" path="res://resources/projectile_data.gd" id="1_data"]
+[ext_resource type="Texture2D" uid="uid://b6gr0btardkd5" path="res://assets/images/projectiles/bullet1.png" id="2_8gy0f"]
+
+[sub_resource type="SpriteFrames" id="SpriteFrames_37qwj"]
+animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": ExtResource("2_8gy0f")
+}],
+"loop": 0,
+"name": &"fly",
+"speed": 5.0
+}]
 
 [resource]
 script = ExtResource("1_data")
+sprite_frames = Array[SpriteFrames]([SubResource("SpriteFrames_37qwj")])
 animation = &"fly"
-placeholder_color = Color(1, 0.55, 0.25, 1)
-speed = 2600.0
 lifetime = 1.2
 radius = 3.5
 damage = 50.0

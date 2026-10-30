@@ -1,0 +1,9 @@
+[gd_scene format=3 uid="uid://c62wqowpem4gp"]
+
+[ext_resource type="Script" uid="uid://dg67wx78jciax" path="res://scripts/world_object.gd" id="1_6odbs"]
+
+[node name="WorldObject" type="CharacterBody2D" unique_id=229077363]
+collision_layer = 4
+collision_mask = 15
+motion_mode = 1
+script = ExtResource("1_6odbs")

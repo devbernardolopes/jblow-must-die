@@ -94,6 +94,7 @@ func is_busy() -> bool:
 	return state == State.ACTION
 
 func locks_movement() -> bool:
+	# TODO: Don't lock movement if player fires but there is not ammo (dry)
 	return state == State.ACTION and _current_action != null and _current_action.locks_movement
 
 func get_state() -> State:

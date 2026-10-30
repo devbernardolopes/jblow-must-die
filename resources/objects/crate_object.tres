@@ -1,0 +1,11 @@
+[gd_resource type="Resource" script_class="WorldObject" format=3 uid="uid://vblyiryruruq"]
+
+[ext_resource type="Script" uid="uid://cog0wbgn2dyrp" path="res://resources/world_object_data.gd" id="1_317wq"]
+[ext_resource type="Texture2D" uid="uid://bt07n7uj2v8oc" path="res://assets/images/objects/RTS_Crate.png" id="2_f01r5"]
+
+[resource]
+script = ExtResource("1_317wq")
+id = &"crate"
+obstacle = true
+visual = ExtResource("2_f01r5")
+metadata/_custom_type_script = "uid://cog0wbgn2dyrp"

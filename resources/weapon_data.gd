@@ -9,6 +9,7 @@ extends Resource
 @export var cooldown_period: float = 0.25
 ## Magazine capacity for guns; 0 means unlimited.
 @export var ammo_amount: int = 0
+@export var hotkey: StringName = &""
 
 @export_category("Projectiles")
 ## Projectile spawned by guns; ignored by melee weapons.
@@ -25,6 +26,7 @@ extends Resource
 @export var attack_action: StringName = &"melee_attack"
 ## Action id resolved against the equipped animation set when reloading.
 @export var reload_action: StringName = &"reload"
+@export var play_reload_for_each_bullet: bool = false
 
 @export_category("Sounds")
 @export var shoot_stream: AudioStream = null

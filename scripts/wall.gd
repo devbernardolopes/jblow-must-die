@@ -4,6 +4,12 @@ extends Path2D
 
 const VIEWER_GROUP := &"wall_viewer"
 
+@export var disable_editor: bool = false:
+	set(v):
+		disable_editor = v
+		_apply_style()
+		_rebuild()
+
 @export var bake_interval: float = 8.0:
 	set(v):
 		bake_interval = v
@@ -35,22 +41,30 @@ const VIEWER_GROUP := &"wall_viewer"
 		solid = v
 		_rebuild_collision()
 
+@export var casts_shadow: bool = true:
+	set(v):
+		casts_shadow = v
+		_rebuild_occluders()
+
+@export_flags_2d_render var occluder_light_mask: int = 1:
+	set(v):
+		occluder_light_mask = v
+		_rebuild_occluders()
+
 @export_group("Height illusion")
+
 ## Front view of the wall. Should tile horizontally.
 @export var side_texture: Texture2D:
 	set(v):
 		side_texture = v
 		_invalidate_height()
+
 ## How strongly the top shifts away from the viewer (fake wall height).
-@export_range(0.0, 0.5, 0.005) var height_factor: float = 0.1:
+@export_range(0.0, 0.5, 0.005) var height_factor: float = 0.06:
 	set(v):
 		height_factor = v
 		_invalidate_height()
-## Max sliver size in pixels.
-@export var max_shift: float = 12.0:
-	set(v):
-		max_shift = v
-		_invalidate_height()
+
 ## Editor-only: where the "eye" is when no viewer node exists in the edited scene.
 @export var preview_viewer_position: Vector2 = Vector2.ZERO:
 	set(v):
@@ -59,6 +73,7 @@ const VIEWER_GROUP := &"wall_viewer"
 
 var line: Line2D
 var body: StaticBody2D
+var occluders: Node2D
 var _connected_curve: Curve2D
 var _rebuilding: bool = false
 
@@ -69,6 +84,9 @@ var _viewer: Node2D
 var _last_viewer := Vector2(NAN, NAN)  # local space; NAN = needs refresh, INF = no viewer
 
 func _ready() -> void:
+	if not Engine.is_editor_hint():
+		disable_editor = false
+
 	add_to_group(&"minimap_source")
 	call_deferred(&"_notify_minimap_changed")
 	line = Line2D.new()
@@ -81,9 +99,12 @@ func _ready() -> void:
 	body.collision_mask = 0
 	add_child(body, false, Node.INTERNAL_MODE_FRONT)
 
+	occluders = Node2D.new()
+	occluders.name = "Occluders"
+	add_child(occluders, false, Node.INTERNAL_MODE_FRONT)
+	
 	_apply_style()
 	_rebuild()
-
 
 ## Tell an already-running minimap about a wall instanced after it.
 func _notify_minimap_changed() -> void:
@@ -92,15 +113,16 @@ func _notify_minimap_changed() -> void:
 	get_tree().call_group(&"minimap", &"rebuild_geometry")
 
 func _process(_delta: float) -> void:
-	# Reconnect if the Curve resource was created/replaced in the Inspector
-	if curve != _connected_curve:
-		if _connected_curve and _connected_curve.changed.is_connected(_rebuild):
-			_connected_curve.changed.disconnect(_rebuild)
-		_connected_curve = curve
-		if curve:
-			curve.changed.connect(_rebuild)
-		_rebuild()
-	_apply_height()
+	if not disable_editor:
+		# Reconnect if the Curve resource was created/replaced in the Inspector
+		if curve != _connected_curve:
+			if _connected_curve and _connected_curve.changed.is_connected(_rebuild):
+				_connected_curve.changed.disconnect(_rebuild)
+			_connected_curve = curve
+			if curve:
+				curve.changed.connect(_rebuild)
+			_rebuild()
+		_apply_height()
 
 func _apply_style() -> void:
 	if line == null:
@@ -126,6 +148,9 @@ func _rebuild() -> void:
 	line.points = _base_points
 	_build_outline()
 	_rebuild_collision()
+	if not Engine.is_editor_hint():
+		_rebuild_occluders()
+	_invalidate_height()
 	_invalidate_height()
 	_rebuilding = false
 
@@ -201,6 +226,33 @@ func _rebuild_collision() -> void:
 		cs.shape = shape
 		body.add_child(cs)
 
+# --- Light occluders ---
+
+func _rebuild_occluders() -> void:
+	if occluders == null:
+		return
+
+	var polys: Array = []
+	if casts_shadow:
+		for poly: PackedVector2Array in _outline:
+			if poly.size() >= 3:
+				polys.append(poly)
+
+	# Reuse existing nodes instead of recreating them on every curve tweak
+	while occluders.get_child_count() > polys.size():
+		var extra := occluders.get_child(occluders.get_child_count() - 1)
+		occluders.remove_child(extra)
+		extra.queue_free()
+	while occluders.get_child_count() < polys.size():
+		var node := LightOccluder2D.new()
+		node.occluder = OccluderPolygon2D.new()
+		occluders.add_child(node)
+
+	for i in polys.size():
+		var node := occluders.get_child(i) as LightOccluder2D
+		node.occluder_light_mask = occluder_light_mask
+		node.occluder.polygon = polys[i]
+
 # --- Height illusion ---
 
 func _invalidate_height() -> void:
@@ -214,9 +266,6 @@ func _viewer_global() -> Vector2:
 	if Engine.is_editor_hint():
 		return preview_viewer_position
 	return Vector2.INF
-
-#func _offset(p: Vector2, viewer: Vector2) -> Vector2:
-	#return ((p - viewer) * height_factor).limit_length(max_shift)
 
 func _offset(p: Vector2, viewer: Vector2) -> Vector2:
 	return (p - viewer) * height_factor

@@ -1,0 +1,20 @@
+[gd_scene format=3 uid="uid://d4a5mcj645qe4"]
+
+[ext_resource type="Script" uid="uid://dg67wx78jciax" path="res://scripts/world_object.gd" id="1_yourn"]
+[ext_resource type="Resource" uid="uid://vblyiryruruq" path="res://resources/objects/crate_object.tres" id="2_ls5c6"]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_m7uww"]
+size = Vector2(507, 507)
+
+[node name="Crate" type="CharacterBody2D" unique_id=414730064]
+scale = Vector2(0.3, 0.3)
+collision_layer = 4
+collision_mask = 15
+motion_mode = 1
+script = ExtResource("1_yourn")
+data = ExtResource("2_ls5c6")
+metadata/_custom_type_script = "uid://dg67wx78jciax"
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=1772627225]
+position = Vector2(0.5, 1.5)
+shape = SubResource("RectangleShape2D_m7uww")

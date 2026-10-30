@@ -246,6 +246,8 @@ func is_out_of_ammo(weapon: WeaponData) -> bool:
 
 ## Attempts to start an animation action; returns whether it started.
 func try_action(action_id: StringName) -> bool:
+	# TODO: Don't enforce cooldown period if player fires but there is not ammo (dry)
+	#push_warning("action_id: %s" % action_id)
 	if animator == null or not _can_start_action(action_id):
 		return false
 	var now: int = Time.get_ticks_msec()
@@ -266,7 +268,8 @@ func _can_start_action(action_id: StringName) -> bool:
 	if current_weapon == null:
 		return true
 	if action_id == current_weapon.attack_action:
-		return not (current_weapon.can_shoot() and is_out_of_ammo(current_weapon))
+		return current_weapon.can_shoot()
+		#return not (current_weapon.can_shoot() and is_out_of_ammo(current_weapon))
 	if action_id == current_weapon.reload_action:
 		if not current_weapon.can_reload():
 			return false
@@ -288,12 +291,13 @@ func _refill_ammo(weapon: WeaponData) -> void:
 	var capacity: int = get_ammo_capacity(weapon)
 	if weapon == null or capacity <= 0:
 		return
+	if weapon.reload_stream:
+		# TODO: 
+		AudioManager.play_at(global_position / Units.PX_PER_METER, weapon.reload_stream)
 	_ammo_by_weapon[weapon.name] = capacity
 
 ## Hook for spawning the weapon's projectile or hit effect.
 func _fire() -> void:
-	push_warning("'fire'")
-	
 	if current_weapon == null or not current_weapon.can_shoot():
 		return
 
@@ -303,7 +307,7 @@ func _fire() -> void:
 
 	if is_out_of_ammo(current_weapon):
 		if current_weapon.dry_stream:
-			AudioManager.play_at(origin / Units.PX_PER_METER, current_weapon.dry_stream)
+			AudioManager.play_at(global_position / Units.PX_PER_METER, current_weapon.dry_stream)
 		return
 	var forward: Vector2 = muzzle.global_transform.x.normalized()
 	if forward.is_zero_approx():
@@ -321,10 +325,8 @@ func _fire() -> void:
 		Projectile.spawn(current_weapon.projectile, origin, direction, self, pellet_damage)
 
 func _on_animator_action_triggered(action_id: StringName) -> void:
-	push_warning("action_triggered.emit == %s" % action_id)
 	action_triggered.emit(action_id)
 	if current_weapon == null:
-		push_warning("current_weapon == null")
 		return
 	if action_id == current_weapon.attack_action:
 		_fire()
@@ -372,6 +374,7 @@ func _physics_process(delta: float) -> void:
 	_update_footstep(delta)
 	var intent: Vector2 = _get_intent()
 	var is_moving: bool = not is_staggered() and not intent.is_zero_approx()
+	#push_warning("is_moving: %s" %is_moving)
 	if animator != null and animator.locks_movement():
 		intent = Vector2.ZERO
 	var move_mode: EntityController.MovementMode = controller.movement_mode

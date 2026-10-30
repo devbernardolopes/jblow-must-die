@@ -1,12 +1,11 @@
-[gd_resource type="Resource" script_class="WeaponData" format=3]
+[gd_resource type="Resource" script_class="WeaponData" format=3 uid="uid://d10ww2re3j5wu"]
 
 [ext_resource type="Script" uid="uid://bln4irpuvk00t" path="res://resources/weapon_data.gd" id="1_knife"]
 
 [resource]
 script = ExtResource("1_knife")
 name = &"knife"
-kind = "Melee"
 base_damage = 8.0
 cooldown_period = 0.6
-attack_action = &"melee_attack"
+hotkey = &"weapon_00"
 metadata/_custom_type_script = "uid://bln4irpuvk00t"

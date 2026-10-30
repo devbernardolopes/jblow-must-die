@@ -1,0 +1,15 @@
+[gd_scene format=3 uid="uid://b5lt7niq8wu1n"]
+
+[ext_resource type="Script" uid="uid://dg67wx78jciax" path="res://scripts/world_object.gd" id="1_p6sc5"]
+[ext_resource type="Resource" uid="uid://d0v8u4vw0ki51" path="res://resources/objects/crate_object_02.tres" id="2_10tbt"]
+
+[node name="Crate02" type="CharacterBody2D" unique_id=1758796112]
+collision_layer = 4
+collision_mask = 15
+motion_mode = 1
+script = ExtResource("1_p6sc5")
+data = ExtResource("2_10tbt")
+metadata/_custom_type_script = "uid://dg67wx78jciax"
+
+[node name="CollisionPolygon2D" type="CollisionPolygon2D" parent="." unique_id=2055978494]
+polygon = PackedVector2Array(-127, -122, 124, -122, 117, 115, -105, 118, -36, 50, -123, -26)

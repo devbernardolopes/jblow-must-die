@@ -3,7 +3,7 @@
 [ext_resource type="AudioStream" uid="uid://bf8c82iba8qix" path="res://assets/sounds/weapons/shotgun/Dry Fire Gun-SoundBible.com-2053652037.wav" id="1_8r06n"]
 [ext_resource type="Script" uid="uid://bln4irpuvk00t" path="res://resources/weapon_data.gd" id="1_yn5nt"]
 [ext_resource type="Resource" uid="uid://dvih3508vkxi8" path="res://resources/projectiles/handgun_bullet.tres" id="2_bullet"]
-[ext_resource type="AudioStream" uid="uid://8a6tfk6akmlv" path="res://assets/sounds/weapons/handgun/gunreload1.wav" id="3_wwuof"]
+[ext_resource type="AudioStream" uid="uid://n4p2okpq0nsq" path="res://assets/sounds/weapons/handgun/Pop Clip In-SoundBible.com-583746573.wav" id="3_8r06n"]
 [ext_resource type="AudioStream" uid="uid://dg3sc6fil3jgc" path="res://assets/sounds/weapons/handgun/pistol.wav" id="5_0wjqe"]
 
 [resource]
@@ -11,12 +11,13 @@ script = ExtResource("1_yn5nt")
 name = &"handgun"
 kind = "Gun"
 base_damage = 10.0
-cooldown_period = 0.15
-ammo_amount = 1000
+cooldown_period = 0.1
+ammo_amount = 10
+hotkey = &"weapon_01"
 projectile = ExtResource("2_bullet")
 muzzle_offset = Vector2(128, 58)
 attack_action = &"shoot"
 shoot_stream = ExtResource("5_0wjqe")
-reload_stream = ExtResource("3_wwuof")
+reload_stream = ExtResource("3_8r06n")
 dry_stream = ExtResource("1_8r06n")
 metadata/_custom_type_script = "uid://bln4irpuvk00t"
