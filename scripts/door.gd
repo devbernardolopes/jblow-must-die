@@ -135,6 +135,10 @@ var _leaf_lengths: Array[float] = []
 var _duration: float = MIN_DURATION
 var _target_progress: float = 0.0
 
+var _outline: Array = []  # polygons around the door footprint
+var body: StaticBody2D = null
+var _base_points := PackedVector2Array()
+var _outer_sign: float = 1.0
 
 func _ready() -> void:
 	if not Engine.is_editor_hint():
@@ -142,6 +146,13 @@ func _ready() -> void:
 
 	add_to_group(MINIMAP_SOURCE_GROUP)
 	rebuild()
+	
+	body = StaticBody2D.new()
+	body.name = "Body"
+	body.collision_layer = PhysicsLayers.OBJECTS
+	body.collision_mask = 0
+	add_child(body, false, Node.INTERNAL_MODE_FRONT)
+	
 	progress = 1.0 if starts_open else 0.0
 	_target_progress = progress
 	_apply_progress()
@@ -238,14 +249,66 @@ func _rebuild() -> void:
 	_rebuilding = true
 	if not is_equal_approx(curve.bake_interval, bake_interval):
 		curve.bake_interval = bake_interval
-	_build_leaves(curve.get_baked_points())
+
+	_base_points = curve.get_baked_points()
+	#_build_leaves(curve.get_baked_points())
+	_build_leaves(_base_points)
 	_duration = _compute_duration()
 	_apply_progress()
 	_sync_interactable()
+	_build_outline()
+	_rebuild_collision()
 	_notify_minimap_changed()
 	_rebuilding = false
 
+static func _signed_area(poly: PackedVector2Array) -> float:
+	var a := 0.0
+	for i in poly.size():
+		var p := poly[i]
+		var q := poly[(i + 1) % poly.size()]
+		a += p.x * q.y - q.x * p.y
+	return a * 0.5
 
+func _build_outline() -> void:
+	_outline = []
+	var pts := _base_points
+	if pts.size() < 2:
+		return
+	# First point == last point means a closed loop (a room)
+	var _closed := pts.size() > 2 and pts[0].distance_to(pts[pts.size() - 1]) < 0.01
+	if _closed:
+		pts = pts.slice(0, pts.size() - 1)
+	var end_type := Geometry2D.END_JOINED if _closed else Geometry2D.END_BUTT
+	_outline = Geometry2D.offset_polyline(pts, width * 0.5, Geometry2D.JOIN_MITER, end_type)
+
+	# Outer polygons share one orientation, holes have the opposite one.
+	# The biggest polygon is always an outer one, so it defines the convention.
+	var best := 0.0
+	for poly in _outline:
+		var a := _signed_area(poly)
+		if absf(a) > absf(best):
+			best = a
+	_outer_sign = signf(best) if best != 0.0 else 1.0
+	
+func _rebuild_collision() -> void:
+	if body == null:
+		return
+	for child in body.get_children():
+		body.remove_child(child)
+		child.queue_free()
+	if not solid:
+		return
+	for poly in _outline:
+		var segs := PackedVector2Array()
+		for i in poly.size():
+			segs.append(poly[i])
+			segs.append(poly[(i + 1) % poly.size()])
+		var shape := ConcavePolygonShape2D.new()
+		shape.segments = segs
+		var cs := CollisionShape2D.new()
+		cs.shape = shape
+		body.add_child(cs)
+		
 func _build_leaves(points: PackedVector2Array) -> void:
 	if leaves.is_empty():
 		_collect_existing_leaves()
@@ -323,8 +386,8 @@ func _configure_leaf(index: int, span: PackedVector2Array) -> void:
 	leaf.setup(local_points)
 	_leaf_lengths[index] = leaf.get_length()
 
-	var closed := Transform2D(0.0, pivot)
-	var open := closed
+	var _closed := Transform2D(0.0, pivot)
+	var _open := _closed
 	match _motion():
 		DoorData.Motion.SWING:
 			var side: float = -1.0 if swing_reversed else 1.0
@@ -336,13 +399,12 @@ func _configure_leaf(index: int, span: PackedVector2Array) -> void:
 				# Hinging on the far end reverses the local sweep, so rotate the
 				# other way to keep the same side of the wall.
 				angle = -angle
-			open = Transform2D(angle, pivot)
+			_open = Transform2D(angle, pivot)
 		_:
-			open = Transform2D(0.0, pivot + _slide_delta(span, pivot, index))
+			_open = Transform2D(0.0, pivot + _slide_delta(span, pivot, index))
 
-	_closed_transforms[index] = closed
-	_open_transforms[index] = open
-
+	_closed_transforms[index] = _closed
+	_open_transforms[index] = _open
 
 ## Travel vector for one sliding panel, in Door-local space.
 func _slide_delta(span: PackedVector2Array, _pivot: Vector2, index: int) -> Vector2:
