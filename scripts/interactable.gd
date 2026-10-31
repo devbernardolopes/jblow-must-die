@@ -51,4 +51,5 @@ func set_radius_m(value: float) -> void:
 	if circle == null:
 		circle = CircleShape2D.new()
 		_shape.shape = circle
+		_shape.debug_color = Color.FLORAL_WHITE
 	circle.radius = Units.m_to_px(radius_m)

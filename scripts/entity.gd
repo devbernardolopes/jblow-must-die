@@ -86,10 +86,22 @@ func _ready() -> void:
 		if controller == null:
 			controller = _find_controller()
 		if interaction == null:
-			interaction = Area2D.new()
-			add_child(interaction)
-		_sort_available_weapons()
+			var children = get_children()
+			if children and not children.is_empty():
+				for i in children.size():
+					var interaction_node = children[i]
+					if interaction_node is PlayerInteraction:
+						interaction = interaction_node
 			
+			#interaction = get_node_or_null("")
+			#interaction = Area2D.new()
+			##interaction.
+			#if interaction.has_method("set_active"):
+				#interaction.call("set_active", true)
+			#add_child(interaction)
+	
+		_sort_available_weapons()
+	
 	motion_mode = CharacterBody2D.MOTION_MODE_FLOATING
 	collision_layer = PhysicsLayers.ENTITIES
 	collision_mask = PhysicsLayers.WORLD | PhysicsLayers.ENTITIES | PhysicsLayers.OBJECTS
@@ -671,7 +683,7 @@ func _configure_collision_shape() -> void:
 	collision.position = Vector2.ONE * collision_offset
 	collision.debug_color = Color.from_hsv(0.4, 0.9, 0.3, 0.5)
 
-func take_damage(amount: float, _source: Node) -> void:
+func take_damage(_amount: float, _source: Node) -> void:
 	#push_warning(self, " takes ", amount, " damage")
 	pass
 	#damage_taken += amount

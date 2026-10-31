@@ -35,6 +35,10 @@ var _manual_zoom: Vector2 = Vector2.ONE * 3.0
 var _look_ahead_m: Vector2 = Vector2.ZERO
 
 func _ready() -> void:
+	if not Engine.is_editor_hint():
+		visible = true
+		enabled = true
+	
 	# Keep smoothing and the follow update on the physics clock. Idle-time smoothing
 	# catches up between physics ticks and makes moving sprites jitter backwards.
 	process_callback = Camera2D.CAMERA2D_PROCESS_PHYSICS
@@ -42,6 +46,7 @@ func _ready() -> void:
 	zoom = default_zoom
 	_manual_zoom = default_zoom
 	add_to_group("wall_viewer")
+	add_to_group("door_viewer")
 
 func snap_to_target() -> void:
 	if target == null or not is_instance_valid(target):
@@ -49,7 +54,6 @@ func snap_to_target() -> void:
 	_look_ahead_m = Vector2.ZERO
 	global_position = target.global_position
 	reset_smoothing()
-	#target.add_to_group("wall_viewer")
 
 func set_mode(value: Mode) -> void:
 	if mode == value:
