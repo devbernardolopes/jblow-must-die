@@ -1,9 +1,0 @@
-[gd_scene format=3 uid="uid://djr4s34u5kqfg"]
-
-[ext_resource type="Script" uid="uid://kkor13v8fx4b" path="res://scripts/door.gd" id="1_hpvv5"]
-
-[sub_resource type="Curve2D" id="Curve2D_5f452"]
-
-[node name="Door" type="Path2D" unique_id=1365393699]
-curve = SubResource("Curve2D_5f452")
-script = ExtResource("1_hpvv5")

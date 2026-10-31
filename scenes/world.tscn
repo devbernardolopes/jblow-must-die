@@ -277,7 +277,7 @@ metadata/_custom_type_script = "uid://unw2ftguph2y"
 
 [node name="Door" type="Path2D" parent="Doors" unique_id=1825347327]
 texture_repeat = 2
-position = Vector2(13515.977, 15731.753)
+position = Vector2(13531, 15723)
 curve = SubResource("Curve2D_ggc52")
 script = ExtResource("22_x2olw")
 data = ExtResource("24_l8ah6")
@@ -375,6 +375,7 @@ rotation = -0.0708135
 scale = Vector2(0.99606967, 1)
 curve = SubResource("Curve2D_luhhm")
 script = ExtResource("4_71j4m")
+disable_editor = true
 texture = ExtResource("16_2lf6f")
 texture_mode = 2
 side_texture = ExtResource("17_7iits")

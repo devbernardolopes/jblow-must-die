@@ -58,6 +58,18 @@ This game is currently being developed and it is in very early stages. No one is
 - `Minimap.Corner` had to be named `MapCorner`: Godot 4.7 has a global `Corner` type that shadows a local enum of the same name and breaks parsing.
 - Circular/rounded clipping happens in `Minimap._draw_geometry()`: world points are transformed to map-local pixels and clipped with `Geometry2D.intersect_polyline_with_polygon` / `intersect_polygons` against a generated circle or rounded-rectangle polygon. There is no clip shader; do not reintroduce one.
 
+## Door Authoring
+
+- Doors are authored like walls: a `Door` (`Path2D`, `@tool`) in the World scene whose curve is the closed footprint (two points). The Door node is a fixed anchor and never moves; only its `DoorLeaf` children animate.
+- A leaf is one panel. It owns the `Line2D`, `AnimatableBody2D` collision and `LightOccluder2D`s in leaf-local space. Sliding sets the leaf transform; swinging rotates it about the leaf origin, which sits on a curve point (the hinge).
+- `DoorData` describes the type: `kind` (SINGLE/DOUBLE), `motion` (SLIDE/SWING), prompts, key requirements, `open_angle_degrees` and `slide_ratio`. Per-instance placement lives on the node: `hinge_at_end`, `slide_reversed`, `swing_reversed`, `open_speed`, `starts_open`.
+- Double doors split the baked curve at half its length; each half hinges or slides outward from its own outer end.
+- Use `open()`, `close()` and `toggle()`. `state`, `progress`, `opened`, `closed` and `state_changed` are the runtime API. A single progress value makes reversal from any pose seamless; do not add per-state starting positions.
+- Doors animate in `_physics_process` because the panels are `AnimatableBody2D` and must push entities on the physics clock.
+- The built-in `Interactable` is an internal child placed at the curve midpoint, so it stays fixed while the panels move. `interaction_radius_m` is in meters. Never parent interaction nodes to a leaf.
+- External mechanisms (levers, keypads) can live anywhere in the world and call `Door.open()` / `toggle()`; author a `DoorSwitch` and point its `door` at the Door for a ready-made fixed interaction point. Never animate the Door node itself.
+- The minimap publishes the authored closed footprint as `MinimapGeometry.Kind.DOOR`; it does not follow the panels.
+
 ## AI Authoring
 
 - Non-player entities use `AIController` (`EntityController` subclass) as the brain and actuator. `Entity` stays unaware of who drives it; `EntityController.tick(delta)` runs at the start of `Entity._physics_process`.
@@ -93,6 +105,7 @@ godot --headless --path . --script res://tests/test_weapon_system.gd
 godot --headless --path . --script res://tests/test_projectiles.gd
 godot --headless --path . --script res://tests/test_player_controller.gd
 godot --headless --path . --script res://tests/test_minimap.gd
+godot --headless --path . --script res://tests/test_door.gd
 godot --headless --path . --script res://tests/test_ai.gd
 ```
 
