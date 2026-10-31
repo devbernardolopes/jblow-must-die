@@ -7,8 +7,8 @@ enum DOOR_STATE { CLOSED, OPENED, CLOSING, OPENING }
 const VIEWER_GROUP := &"door_viewer"
 
 @export var data: DoorData = null
-
 @export var state: DOOR_STATE = DOOR_STATE.CLOSED
+@export var open_speed: float = 256.0
 
 @export var disable_editor: bool = false:
 	set(v):
@@ -93,7 +93,6 @@ var _interactable: Interactable = null
 
 var move_toward_start_position_y: float = 0.00
 var move_toward_amount: float = 0.00
-var open_speed: float = 64.0
 
 func _get_state() -> DOOR_STATE:
 	return state

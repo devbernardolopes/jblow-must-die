@@ -29,5 +29,6 @@ metadata/_custom_type_script = "uid://chetgdd278faa"
 
 [node name="AIPerception" type="Node2D" parent="." unique_id=29102073]
 script = ExtResource("6_ai_perception")
+view_distance_m = 30.0
 debug_draw = true
 metadata/_custom_type_script = "uid://dk1567yva5stc"

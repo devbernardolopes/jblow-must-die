@@ -9,6 +9,8 @@
 [ext_resource type="Script" uid="uid://cgykxjtkwtl8b" path="res://ai/tasks/ai_next_patrol_point.gd" id="7_nqlpm"]
 [ext_resource type="Script" uid="uid://dl2xl7tccx8d6" path="res://ai/tasks/ai_move_to_point.gd" id="8_qwcki"]
 
+[sub_resource type="BlackboardPlan" id="BlackboardPlan_kdtxp"]
+
 [sub_resource type="BTCondition" id="BTCondition_1j2qu"]
 script = ExtResource("1_kdtxp")
 
@@ -60,4 +62,5 @@ children = [SubResource("BTDynamicSequence_khv5d"), SubResource("BTDynamicSequen
 
 [resource]
 description = "Melee zombie: flee when hurt, chase and attack, otherwise patrol."
+blackboard_plan = SubResource("BlackboardPlan_kdtxp")
 root_task = SubResource("BTDynamicSelector_mnx5d")

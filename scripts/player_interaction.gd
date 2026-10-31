@@ -5,7 +5,7 @@ extends Area2D
 signal target_changed(target: Interactable)
 signal message(text: String)
 
-const RADIUS_M: float = 1.6
+const RADIUS_M: float = 6.0
 const FRONT_BONUS_M: float = 0.5
 const FRONT_DOT_THRESHOLD: float = 0.5
 

@@ -1,7 +1,7 @@
 [gd_scene format=3 uid="uid://ct1ts2hqpa3ck"]
 
 [ext_resource type="Texture2D" uid="uid://bueu18hffikko" path="res://assets/images/textures/mtl_g01bluemetal01.png" id="1_4wyf3"]
-[ext_resource type="Texture2D" uid="uid://d3qyvq6347qbc" path="res://assets/images/textures/mtl_g01basemetal01.png" id="1_munwf"]
+[ext_resource type="Texture2D" uid="uid://f66ika1m4h1j" path="res://assets/images/textures/StoneFloorTexture.png" id="1_l8ah6"]
 [ext_resource type="Script" uid="uid://0yh2bjs84b32" path="res://scripts/entity.gd" id="1_rwgxs"]
 [ext_resource type="Resource" uid="uid://bwpv28wrd0ii" path="res://resources/entities/web_developer/web_developer.tres" id="2_4wyf3"]
 [ext_resource type="Shader" uid="uid://cwfgsnx5cb0dy" path="res://shaders/wormhole.gdshader" id="2_oo54l"]
@@ -37,6 +37,8 @@
 [ext_resource type="PackedScene" uid="uid://3cjfjex46k2c" path="res://scenes/minimap.tscn" id="25_minimap"]
 [ext_resource type="Texture2D" uid="uid://diktln3hdt4k6" path="res://assets/images/textures/t_flashlightpattern.png" id="25_xgqkh"]
 [ext_resource type="PackedScene" uid="uid://ufgwgdsywos2" path="res://scenes/entities/zombie.tscn" id="26_zombie"]
+[ext_resource type="Texture2D" uid="uid://ccdb76i7csweg" path="res://assets/images/textures/mtl_g01metaltrim01.png" id="33_l8ah6"]
+[ext_resource type="Texture2D" uid="uid://oa36apxu8qdl" path="res://assets/images/textures/mtl_g01greymetal03.png" id="34_e75v4"]
 
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_m7uww"]
 shader = ExtResource("2_oo54l")
@@ -76,7 +78,7 @@ point_count = 2
 [sub_resource type="Curve2D" id="Curve2D_i7141"]
 bake_interval = 8.0
 _data = {
-"points": PackedVector2Array(0, 0, 0, 0, 8330, 1663, 0, 0, 0, 0, 21142, 2121, 0, 0, 0, 0, 27081, 2516, 0, 0, 0, 0, 35329, 3160, 0, 0, 0, 0, 37580, 13892, 0, 0, 0, 0, 30212, 16780, 0, 0, 0, 0, 19160, 19817, 0, 0, 0, 0, 10397, 20912, 0, 0, 0, 0, 7410, 18572, 0, 0, 0, 0, 5967, 14241, 0, 0, 0, 0, 4129.5356, 8214.222, 0, 0, 0, 0, 2825.728, 5468.1235, 0, 0, 0, 0, 5886.7505, 3065.8726, 0, 0, 0, 0, 8330, 1663)
+"points": PackedVector2Array(0, 0, 0, 0, 8330, 1663, 0, 0, 0, 0, 21142, 2121, 0, 0, 0, 0, 22471.1, 8544.235, 0, 0, 0, 0, 30847.1, 4820.2354, 0, 0, 0, 0, 32984.1, 14365.235, 0, 0, 0, 0, 30212, 16780, 0, 0, 0, 0, 19160, 19817, 0, 0, 0, 0, 10397, 20912, 0, 0, 0, 0, 7410, 18572, 0, 0, 0, 0, 5967, 14241, 0, 0, 0, 0, 4129.5356, 8214.222, 0, 0, 0, 0, 2825.728, 5468.1235, 0, 0, 0, 0, 5886.7505, 3065.8726, 0, 0, 0, 0, 8330, 1663)
 }
 point_count = 14
 
@@ -129,14 +131,21 @@ _data = {
 }
 point_count = 7
 
+[sub_resource type="Curve2D" id="Curve2D_8u370"]
+bake_interval = 8.0
+_data = {
+"points": PackedVector2Array(0, 0, 0, 0, 464.47266, 71.4082, 0, 0, 0, 0, 17164.473, 708.4082)
+}
+point_count = 2
+
 [node name="World" type="Node2D" unique_id=1936967746]
 
 [node name="Terrain" type="Node2D" parent="." unique_id=263962426]
 
 [node name="Polygon2D" type="Polygon2D" parent="Terrain" unique_id=438616211]
 texture_repeat = 2
-texture = ExtResource("1_munwf")
-polygon = PackedVector2Array(2261, 6387, 8299, 1649, 23512, 2206, 48934, 4227, 55486, 29913, 10843, 39836)
+texture = ExtResource("1_l8ah6")
+polygon = PackedVector2Array(2261, 6387, 8299, 1649, 23512, 2206, 36638, 5277, 40574, 18908, 10806, 28051)
 metadata/_edit_lock_ = true
 
 [node name="Decals" type="Node2D" parent="." unique_id=2112393720]
@@ -182,7 +191,7 @@ y_sort_enabled = true
 position = Vector2(11597.471, 11597.126)
 
 [node name="Zombie2" parent="Entities/Enemies" unique_id=472102907 instance=ExtResource("26_zombie")]
-position = Vector2(15978.158, 15119.592)
+position = Vector2(16151, 15118)
 
 [node name="Zombie3" parent="Entities/Enemies" unique_id=1210227673 instance=ExtResource("26_zombie")]
 position = Vector2(10802.23, 11206.845)
@@ -209,23 +218,26 @@ position = Vector2(15731.557, 14622.592)
 metadata/_scene_painted = true
 
 [node name="Zombie9" parent="Entities/Enemies" unique_id=167340481 instance=ExtResource("26_zombie")]
-position = Vector2(16043.469, 15625.602)
+position = Vector2(15860, 15533)
 metadata/_scene_painted = true
 
+[node name="Zombie10" parent="Entities/Enemies" unique_id=1120293483 instance=ExtResource("26_zombie")]
+position = Vector2(15178.645, 15097.159)
+
 [node name="Hero" type="CharacterBody2D" parent="Entities" unique_id=1469266724 node_paths=PackedStringArray("muzzle")]
-position = Vector2(14356, 15684)
+position = Vector2(16975.37, 16817.416)
 collision_layer = 2
 collision_mask = 7
 motion_mode = 1
 script = ExtResource("1_rwgxs")
 data = ExtResource("2_4wyf3")
 speed_multiplier = 3.0
-collision_offset = Vector2(-48, 18)
+collision_offset = Vector2(-12, 13)
 current_weapon = ExtResource("7_lakw3")
 available_weapons = Array[ExtResource("6_7t5mc")]([ExtResource("7_lakw3"), ExtResource("10_7iits"), ExtResource("13_37qwj"), ExtResource("14_37qwj")])
 inventory = Array[ExtResource("17_rup4s")]([ExtResource("18_4kbfs"), ExtResource("19_4kbfs")])
 team = &"player"
-muzzle = NodePath("@Marker2D@44094")
+muzzle = NodePath("@Marker2D@77274")
 metadata/_custom_type_script = "uid://0yh2bjs84b32"
 
 [node name="PlayerController" type="Node" parent="Entities/Hero" unique_id=385327029]
@@ -284,14 +296,14 @@ disable_editor = true
 
 [node name="Wall" type="Path2D" parent="Walls/OuterWalls" unique_id=608939998]
 texture_repeat = 2
-position = Vector2(1432.3672, 2181.769)
-scale = Vector2(1.2363658, 1.5569639)
+position = Vector2(2543.9001, 2943.765)
 curve = SubResource("Curve2D_i7141")
 script = ExtResource("4_71j4m")
 disable_editor = true
 texture = ExtResource("5_qfnet")
 side_texture = ExtResource("20_oo54l")
 metadata/_custom_type_script = "uid://cwq11bwr8h2h8"
+metadata/_edit_lock_ = true
 
 [node name="InnerWalls" type="Node2D" parent="Walls" unique_id=59919917]
 
@@ -367,16 +379,24 @@ texture = ExtResource("16_2lf6f")
 texture_mode = 2
 side_texture = ExtResource("17_7iits")
 metadata/_custom_type_script = "uid://cwq11bwr8h2h8"
-metadata/_edit_lock_ = true
+
+[node name="Wall8" type="Path2D" parent="Walls/InnerWalls" unique_id=1156249860]
+texture_repeat = 2
+position = Vector2(14926.527, 17325.592)
+curve = SubResource("Curve2D_8u370")
+script = ExtResource("4_71j4m")
+disable_editor = true
+texture = ExtResource("33_l8ah6")
+side_texture = ExtResource("34_e75v4")
+metadata/_custom_type_script = "uid://cwq11bwr8h2h8"
 
 [node name="Canopy" type="Node2D" parent="." unique_id=1016076990]
 
 [node name="FollowCamera" type="Camera2D" parent="." unique_id=787066361 node_paths=PackedStringArray("target")]
 visible = false
-position = Vector2(14356, 15684)
+position = Vector2(16975.37, 16817.416)
 zoom = Vector2(0.4000009, 0.4000009)
 process_callback = 0
-position_smoothing_enabled = true
 script = ExtResource("6_qfnet")
 target = NodePath("../Entities/Hero")
 auto_idle_zoom = 0.4
