@@ -412,7 +412,7 @@ func _resolve_target() -> Node2D:
 	var parent := get_parent()
 	if parent != null and "target" in parent:
 		var value: Variant = parent.get("target")
-		if value is Node2D and is_instance_valid(value):
+		if is_instance_valid(value) and value is Node2D:
 			return value as Node2D
 	return null
 

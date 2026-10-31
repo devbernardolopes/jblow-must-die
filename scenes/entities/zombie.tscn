@@ -1,0 +1,33 @@
+[gd_scene format=3 uid="uid://ufgwgdsywos2"]
+
+[ext_resource type="Script" uid="uid://0yh2bjs84b32" path="res://scripts/entity.gd" id="1_entity"]
+[ext_resource type="Resource" uid="uid://7b3w44xgatiu" path="res://resources/entities/zombies/zombie.tres" id="2_data"]
+[ext_resource type="Resource" uid="uid://j26o6wdfa204" path="res://resources/weapons/hands_weapon.tres" id="3_hands"]
+[ext_resource type="Script" uid="uid://bln4irpuvk00t" path="res://resources/weapon_data.gd" id="4_weapon_data"]
+[ext_resource type="Script" uid="uid://chetgdd278faa" path="res://scripts/ai_controller.gd" id="5_ai_controller"]
+[ext_resource type="Script" uid="uid://dk1567yva5stc" path="res://scripts/ai_perception.gd" id="6_ai_perception"]
+[ext_resource type="BehaviorTree" uid="uid://bgmngfae4g64m" path="res://ai/trees/zombie_melee.tres" id="7_tree"]
+
+[node name="Zombie" type="CharacterBody2D" unique_id=1210227673 node_paths=PackedStringArray("muzzle")]
+collision_layer = 2
+collision_mask = 7
+motion_mode = 1
+script = ExtResource("1_entity")
+data = ExtResource("2_data")
+collision_offset = Vector2(-36, 12)
+current_weapon = ExtResource("3_hands")
+available_weapons = Array[ExtResource("4_weapon_data")]([ExtResource("3_hands")])
+team = &"enemy"
+muzzle = NodePath("Muzzle")
+metadata/_custom_type_script = "uid://0yh2bjs84b32"
+
+[node name="AIController" type="Node" parent="." unique_id=2079995285]
+script = ExtResource("5_ai_controller")
+behavior_tree = ExtResource("7_tree")
+movement_mode = 2
+metadata/_custom_type_script = "uid://chetgdd278faa"
+
+[node name="AIPerception" type="Node2D" parent="." unique_id=29102073]
+script = ExtResource("6_ai_perception")
+debug_draw = true
+metadata/_custom_type_script = "uid://dk1567yva5stc"

@@ -12,9 +12,13 @@ const INERTIA_DECELERATION_MPS2: float = 8.0
 ## Inherited speed above which the controller is ignored (the entity is staggered).
 const INERTIA_CONTROL_SPEED_MPS: float = 1.0
 const INERTIA_STOP_SPEED_MPS: float = 0.05
+## Fallback hit points when the entity has no EntityData resource.
+const DEFAULT_MAX_HEALTH: float = 10.0
 
 signal push_rejected(target: Node, required_strength: int)
 signal action_triggered(action_id: StringName)
+signal damaged(amount: float, source: Node)
+signal died(source: Node)
 
 @export var data: EntityData = null:
 	set(v):
@@ -50,6 +54,12 @@ signal action_triggered(action_id: StringName)
 ## Node projectiles spawn from; positioned from the equipped weapon's muzzle_offset.
 @export var muzzle: Marker2D = null
 
+@export_category("Melee")
+## Reach of melee attacks in meters, measured from the entity center.
+@export var melee_reach_m: float = 9.0
+## Full width of the melee hit arc in degrees, centred on facing.
+@export_range(0.0, 360.0) var melee_arc_degrees: float = 120.0
+
 var visual: AnimatedSprite2D = null
 var animator: EntityAnimator = null
 var collision: CollisionShape2D = null
@@ -57,6 +67,10 @@ var interaction: Area2D = null
 var controller: EntityController = null
 
 var facing: Vector2 = Vector2.RIGHT
+## Current hit points; set from EntityData.max_health when the entity enters the tree.
+var health: float = 0.0
+## Latched once lethal damage is applied; the node is freed at the end of the frame.
+var dead: bool = false
 ## Frozen during screen transitions: velocity zero and the controller is not read.
 var locked: bool = false
 var _footstep_accumulated_m: float = 0.0
@@ -77,6 +91,9 @@ var _audio_manager: Node = null
 
 var _red_dot: Line2D = null
 var _red_dot_ray_cast: RayCast2D = null
+
+func _enter_tree() -> void:
+	health = get_max_health()
 
 func _ready() -> void:
 	_refresh_animation_set()
@@ -375,12 +392,37 @@ func _fire() -> void:
 		var direction: Vector2 = forward.rotated(start + step * float(index))
 		Projectile.spawn(current_weapon.projectile, origin, direction, self, pellet_damage)
 
+## Applies melee damage to hostile entities inside the reach arc with clear line of sight.
+func _melee_hit() -> void:
+	if current_weapon == null or current_weapon.can_shoot():
+		return
+	var reach_px: float = Units.m_to_px(maxf(melee_reach_m, 0.0))
+	var half_arc_rad: float = deg_to_rad(clampf(melee_arc_degrees, 0.0, 360.0) * 0.5)
+	for node: Node in get_tree().get_nodes_in_group(&"entities"):
+		var target: Entity = node as Entity
+		if target == null or target == self or not target.is_alive():
+			continue
+		if not is_hostile_to(target):
+			continue
+		var offset: Vector2 = target.global_position - global_position
+		if offset.length_squared() > reach_px * reach_px:
+			continue
+		if absf(facing.angle_to(offset)) > half_arc_rad:
+			continue
+		var los_mask: int = PhysicsLayers.WORLD | PhysicsLayers.OBJECTS
+		if not has_line_of_sight(global_position, target.global_position, los_mask):
+			continue
+		target.take_damage(current_weapon.base_damage, self)
+
 func _on_animator_action_triggered(action_id: StringName) -> void:
 	action_triggered.emit(action_id)
 	if current_weapon == null:
 		return
 	if action_id == current_weapon.attack_action:
-		_fire()
+		if current_weapon.can_shoot():
+			_fire()
+		else:
+			_melee_hit()
 	elif action_id == current_weapon.reload_action and _reload_weapon != null:
 		_refill_ammo(_reload_weapon)
 		_reload_weapon = null
@@ -415,6 +457,10 @@ func _get_inventory_item(_item: StringName) -> ItemData:
 func _physics_process(delta: float) -> void:
 	if Engine.is_editor_hint():
 		return
+	if dead:
+		return
+	if controller != null:
+		controller.tick(delta)
 	# Consume every tick so aim requests cannot pile up while locked.
 	var aim_direction: Vector2 = Vector2.ZERO
 	if controller != null:
@@ -683,10 +729,62 @@ func _configure_collision_shape() -> void:
 	collision.position = Vector2.ONE * collision_offset
 	collision.debug_color = Color.from_hsv(0.4, 0.9, 0.3, 0.5)
 
-func take_damage(_amount: float, _source: Node) -> void:
-	#push_warning(self, " takes ", amount, " damage")
-	pass
-	#damage_taken += amount
+## Hit points before death; falls back to a sane default without EntityData.
+func get_max_health() -> float:
+	if data == null or data.max_health <= 0.0:
+		return DEFAULT_MAX_HEALTH
+	return data.max_health
+
+func get_health_ratio() -> float:
+	var max_health: float = get_max_health()
+	if max_health <= 0.0:
+		return 0.0
+	return clampf(health / max_health, 0.0, 1.0)
+
+func is_alive() -> bool:
+	return not dead and health > 0.0
+
+## Teams are opt-in: entities without a team never fight each other.
+func is_hostile_to(other: Entity) -> bool:
+	if other == null or other == self:
+		return false
+	if team.is_empty() or other.team.is_empty():
+		return false
+	return team != other.team
+
+## True when nothing on `mask` blocks the segment from `from` to `to`.
+func has_line_of_sight(from: Vector2, to: Vector2, mask: int) -> bool:
+	if not is_inside_tree():
+		return false
+	var space: PhysicsDirectSpaceState2D = get_world_2d().direct_space_state
+	if space == null:
+		return false
+	if from.is_equal_approx(to):
+		return true
+	var query: PhysicsRayQueryParameters2D = PhysicsRayQueryParameters2D.create(
+		from, to, mask, [get_rid()]
+	)
+	query.collide_with_areas = false
+	return space.intersect_ray(query).is_empty()
+
+## Applies damage, emits `damaged`, and dies when health reaches zero.
+func take_damage(amount: float, source: Node) -> void:
+	if dead or amount <= 0.0:
+		return
+	health = maxf(health - amount, 0.0)
+	damaged.emit(amount, source)
+	if health <= 0.0:
+		_die(source)
+
+func _die(source: Node) -> void:
+	if dead:
+		return
+	dead = true
+	velocity = Vector2.ZERO
+	if animator != null:
+		animator.cancel_action()
+	died.emit(source)
+	queue_free()
 
 func _sort_available_weapons() -> void:
 	if available_weapons and not available_weapons.is_empty():

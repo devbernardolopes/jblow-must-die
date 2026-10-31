@@ -10,14 +10,12 @@
 [ext_resource type="Script" uid="uid://cwq11bwr8h2h8" path="res://scripts/wall.gd" id="4_71j4m"]
 [ext_resource type="Texture2D" uid="uid://b6mpme2fr54ih" path="res://assets/images/projectiles/spent_shell.png" id="4_luhhm"]
 [ext_resource type="PackedScene" uid="uid://d4a5mcj645qe4" path="res://scenes/objects/crate.tscn" id="4_munwf"]
-[ext_resource type="Resource" uid="uid://7b3w44xgatiu" path="res://resources/entities/zombies/zombie.tres" id="5_e3hyu"]
 [ext_resource type="PackedScene" uid="uid://b1sw3pic0adx7" path="res://scenes/objects/new_game_slot.tscn" id="5_navra"]
 [ext_resource type="Texture2D" uid="uid://cob4ubhuebdyg" path="res://assets/images/textures/mtl_g01metaltrim02b.png" id="5_qfnet"]
 [ext_resource type="Script" uid="uid://cg1uto20g3kh3" path="res://scripts/walls_helper.gd" id="5_w7kh3"]
 [ext_resource type="Script" uid="uid://bln4irpuvk00t" path="res://resources/weapon_data.gd" id="6_7t5mc"]
 [ext_resource type="Script" uid="uid://cufxcsg1oinft" path="res://scripts/follow_camera.gd" id="6_qfnet"]
 [ext_resource type="Resource" uid="uid://bp0cqsl0kkg3k" path="res://resources/weapons/handgun_weapon.tres" id="7_lakw3"]
-[ext_resource type="Resource" uid="uid://j26o6wdfa204" path="res://resources/weapons/hands_weapon.tres" id="8_pm21f"]
 [ext_resource type="Resource" uid="uid://c3hie3old5k53" path="res://resources/weapons/shotgun_weapon.tres" id="10_7iits"]
 [ext_resource type="Script" uid="uid://b3paqdjyulegx" path="res://scripts/audio_listener_2d.gd" id="12_kpybi"]
 [ext_resource type="Resource" uid="uid://dkgwsb5a2ewhx" path="res://resources/weapons/rifle_weapon.tres" id="13_37qwj"]
@@ -38,6 +36,7 @@
 [ext_resource type="FontFile" uid="uid://bhfyrtn21caud" path="res://assets/fonts/KarminaReg.otf" id="24_xgqkh"]
 [ext_resource type="PackedScene" uid="uid://3cjfjex46k2c" path="res://scenes/minimap.tscn" id="25_minimap"]
 [ext_resource type="Texture2D" uid="uid://diktln3hdt4k6" path="res://assets/images/textures/t_flashlightpattern.png" id="25_xgqkh"]
+[ext_resource type="PackedScene" uid="uid://ufgwgdsywos2" path="res://scenes/entities/zombie.tscn" id="26_zombie"]
 
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_m7uww"]
 shader = ExtResource("2_oo54l")
@@ -179,30 +178,39 @@ y_sort_enabled = true
 
 [node name="Enemies" type="Node2D" parent="Entities" unique_id=1998480042]
 
-[node name="Zombie" type="CharacterBody2D" parent="Entities/Enemies" unique_id=1722025293 node_paths=PackedStringArray("muzzle")]
+[node name="Zombie" parent="Entities/Enemies" unique_id=1299854459 instance=ExtResource("26_zombie")]
 position = Vector2(11597.471, 11597.126)
-collision_layer = 2
-collision_mask = 7
-motion_mode = 1
-script = ExtResource("1_rwgxs")
-data = ExtResource("5_e3hyu")
-collision_offset = Vector2(-36, 12)
-current_weapon = ExtResource("8_pm21f")
-available_weapons = Array[ExtResource("6_7t5mc")]([ExtResource("8_pm21f")])
-team = &"enemy"
-muzzle = NodePath("Muzzle")
-metadata/_custom_type_script = "uid://0yh2bjs84b32"
 
-[node name="Entity" type="CharacterBody2D" parent="Entities/Enemies" unique_id=317838120 node_paths=PackedStringArray("muzzle")]
+[node name="Zombie2" parent="Entities/Enemies" unique_id=472102907 instance=ExtResource("26_zombie")]
 position = Vector2(15978.158, 15119.592)
-collision_layer = 2
-collision_mask = 7
-motion_mode = 1
-script = ExtResource("1_rwgxs")
-data = ExtResource("5_e3hyu")
-team = &"enemy"
-muzzle = NodePath("Muzzle")
-metadata/_custom_type_script = "uid://0yh2bjs84b32"
+
+[node name="Zombie3" parent="Entities/Enemies" unique_id=1210227673 instance=ExtResource("26_zombie")]
+position = Vector2(10802.23, 11206.845)
+metadata/_scene_painted = true
+
+[node name="Zombie4" parent="Entities/Enemies" unique_id=1412349571 instance=ExtResource("26_zombie")]
+position = Vector2(12473.131, 12004.32)
+metadata/_scene_painted = true
+
+[node name="Zombie5" parent="Entities/Enemies" unique_id=336437339 instance=ExtResource("26_zombie")]
+position = Vector2(13572.639, 10885.7705)
+metadata/_scene_painted = true
+
+[node name="Zombie6" parent="Entities/Enemies" unique_id=1583878291 instance=ExtResource("26_zombie")]
+position = Vector2(13652.146, 11301.652)
+metadata/_scene_painted = true
+
+[node name="Zombie7" parent="Entities/Enemies" unique_id=134758633 instance=ExtResource("26_zombie")]
+position = Vector2(14208.694, 11301.652)
+metadata/_scene_painted = true
+
+[node name="Zombie8" parent="Entities/Enemies" unique_id=1304285492 instance=ExtResource("26_zombie")]
+position = Vector2(15731.557, 14622.592)
+metadata/_scene_painted = true
+
+[node name="Zombie9" parent="Entities/Enemies" unique_id=167340481 instance=ExtResource("26_zombie")]
+position = Vector2(16043.469, 15625.602)
+metadata/_scene_painted = true
 
 [node name="Hero" type="CharacterBody2D" parent="Entities" unique_id=1469266724 node_paths=PackedStringArray("muzzle")]
 position = Vector2(14356, 15684)
@@ -216,7 +224,8 @@ collision_offset = Vector2(-48, 18)
 current_weapon = ExtResource("7_lakw3")
 available_weapons = Array[ExtResource("6_7t5mc")]([ExtResource("7_lakw3"), ExtResource("10_7iits"), ExtResource("13_37qwj"), ExtResource("14_37qwj")])
 inventory = Array[ExtResource("17_rup4s")]([ExtResource("18_4kbfs"), ExtResource("19_4kbfs")])
-muzzle = NodePath("@Marker2D@20625")
+team = &"player"
+muzzle = NodePath("@Marker2D@44094")
 metadata/_custom_type_script = "uid://0yh2bjs84b32"
 
 [node name="PlayerController" type="Node" parent="Entities/Hero" unique_id=385327029]

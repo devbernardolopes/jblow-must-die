@@ -104,7 +104,7 @@ func _check_action_triggers(animation_set: EntityAnimationSet) -> void:
 			"set '%s' reload refills on a trigger frame" % set_id
 		)
 	if set_id == &"hands":
-		var attack := animation_set.get_explicit_action(&"attack")
+		var attack := animation_set.get_explicit_action(&"melee_attack")
 		_assert(
 			attack != null and attack.trigger_frame == 4,
 			"zombie attack triggers on frame 4"
@@ -118,7 +118,7 @@ func _expected_actions(set_id: StringName) -> Array[StringName]:
 		&"knife", &"flashlight":
 			actions = [&"melee_attack"]
 		&"hands":
-			actions = [&"attack"]
+			actions = [&"melee_attack"]
 	return actions
 
 func _check_weapon(

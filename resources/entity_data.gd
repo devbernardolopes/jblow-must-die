@@ -13,6 +13,10 @@ extends Resource
 @export_range(0.00, 30.00) var wisdom: int = 10
 @export_range(0.00, 30.00) var charisma: int = 10
 
+@export_category("Combat")
+## Hit points before the entity dies; damage is subtracted per hit.
+@export var max_health: float = 100.0
+
 @export_category("Visuals")
 @export var animation_sets: Array[EntityAnimationSet] = []
 ## Set used when no weapon set matches, for example on CPU-only entities.

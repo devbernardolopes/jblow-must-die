@@ -129,7 +129,8 @@ func _on_hitbox_body_entered(body: Node2D) -> void:
 
 	_hit.append(body)
 	if damage > 0.0 and body.has_method(&"take_damage"):
-		body.take_damage(damage, self)
+		var source: Node = shooter if shooter != null and is_instance_valid(shooter) else self
+		body.take_damage(damage, source)
 
 	if _pierce_left < 0:
 		return

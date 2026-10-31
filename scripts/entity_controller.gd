@@ -17,6 +17,11 @@ enum MovementMode {
 ## Speed factor applied when moving backwards in a relative movement mode.
 @export var reverse_speed_factor: float = 0.5
 
+## Called once per physics tick by the owning Entity, before intent is read.
+## AI brains update their behavior tree here so decisions and intent share a tick.
+func tick(_delta: float) -> void:
+	pass
+
 func get_move_vector() -> Vector2:
 	return Vector2.ZERO
 

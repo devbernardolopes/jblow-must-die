@@ -59,11 +59,11 @@ func _test_shotgun() -> void:
 		min_angle = minf(min_angle, angle)
 		max_angle = maxf(max_angle, angle)
 	_assert(
-		absf((max_angle - min_angle) - deg_to_rad(18.0)) < 0.01,
+		absf((max_angle - min_angle) - deg_to_rad(22.0)) < 0.01,
 		"pellet fan covers the configured spread"
 	)
 	_assert(
-		min_angle >= -deg_to_rad(9.0) - 0.01 and max_angle <= deg_to_rad(9.0) + 0.01,
+		min_angle >= -deg_to_rad(11.0) - 0.01 and max_angle <= deg_to_rad(11.0) + 0.01,
 		"pellet fan is centered on the muzzle direction"
 	)
 

@@ -48,6 +48,7 @@
 
 [sub_resource type="Resource" id="Resource_attack"]
 script = ExtResource("99_action")
+id = &"melee_attack"
 trigger_frame = 4
 
 [sub_resource type="SpriteFrames" id="SpriteFrames_ps636"]
@@ -192,7 +193,7 @@ animations = [{
 "duration": 1.0,
 "texture": ExtResource("44_p3bix")
 }],
-"loop": 0,
+"loop": 1,
 "name": &"move",
 "speed": 24.0
 }]

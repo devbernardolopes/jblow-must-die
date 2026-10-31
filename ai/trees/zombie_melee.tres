@@ -1,0 +1,63 @@
+[gd_resource type="BehaviorTree" format=3 uid="uid://bgmngfae4g64m"]
+
+[ext_resource type="Script" uid="uid://kopwog3ddl6s" path="res://ai/tasks/ai_health_below.gd" id="1_kdtxp"]
+[ext_resource type="Script" uid="uid://flgjld72pi44" path="res://ai/tasks/ai_flee_from_target.gd" id="2_fopf7"]
+[ext_resource type="Script" uid="uid://dr7xnn40o70og" path="res://ai/tasks/ai_has_target.gd" id="3_ieung"]
+[ext_resource type="Script" uid="uid://2a7r10ad7q6k" path="res://ai/tasks/ai_aim_at_target.gd" id="4_mo802"]
+[ext_resource type="Script" uid="uid://dpy1a1ssq3usm" path="res://ai/tasks/ai_chase_target.gd" id="5_tpphq"]
+[ext_resource type="Script" uid="uid://fmvy7usfh67" path="res://ai/tasks/ai_attack_target.gd" id="6_3t8ns"]
+[ext_resource type="Script" uid="uid://cgykxjtkwtl8b" path="res://ai/tasks/ai_next_patrol_point.gd" id="7_nqlpm"]
+[ext_resource type="Script" uid="uid://dl2xl7tccx8d6" path="res://ai/tasks/ai_move_to_point.gd" id="8_qwcki"]
+
+[sub_resource type="BTCondition" id="BTCondition_1j2qu"]
+script = ExtResource("1_kdtxp")
+
+[sub_resource type="BTAction" id="BTAction_yp3pj"]
+script = ExtResource("2_fopf7")
+
+[sub_resource type="BTDynamicSequence" id="BTDynamicSequence_khv5d"]
+custom_name = "Flee"
+children = [SubResource("BTCondition_1j2qu"), SubResource("BTAction_yp3pj")]
+
+[sub_resource type="BTCondition" id="BTCondition_gxbyy"]
+script = ExtResource("3_ieung")
+
+[sub_resource type="BTAction" id="BTAction_sj60a"]
+script = ExtResource("4_mo802")
+
+[sub_resource type="BTAction" id="BTAction_o7goo"]
+script = ExtResource("5_tpphq")
+
+[sub_resource type="BTAction" id="BTAction_ev46v"]
+script = ExtResource("6_3t8ns")
+
+[sub_resource type="BTParallel" id="BTParallel_6f4g7"]
+num_successes_required = 3
+repeat = true
+children = [SubResource("BTAction_sj60a"), SubResource("BTAction_o7goo"), SubResource("BTAction_ev46v")]
+
+[sub_resource type="BTDynamicSequence" id="BTDynamicSequence_ax7qv"]
+custom_name = "Combat"
+children = [SubResource("BTCondition_gxbyy"), SubResource("BTParallel_6f4g7")]
+
+[sub_resource type="BTAction" id="BTAction_g082w"]
+script = ExtResource("7_nqlpm")
+
+[sub_resource type="BTAction" id="BTAction_n8073"]
+script = ExtResource("8_qwcki")
+arrival_distance_m = 1.5
+
+[sub_resource type="BTRandomWait" id="BTRandomWait_5qe7k"]
+max_duration = 3.0
+
+[sub_resource type="BTSequence" id="BTSequence_k1jgb"]
+custom_name = "Patrol"
+children = [SubResource("BTAction_g082w"), SubResource("BTAction_n8073"), SubResource("BTRandomWait_5qe7k")]
+
+[sub_resource type="BTDynamicSelector" id="BTDynamicSelector_mnx5d"]
+custom_name = "Zombie Melee"
+children = [SubResource("BTDynamicSequence_khv5d"), SubResource("BTDynamicSequence_ax7qv"), SubResource("BTSequence_k1jgb")]
+
+[resource]
+description = "Melee zombie: flee when hurt, chase and attack, otherwise patrol."
+root_task = SubResource("BTDynamicSelector_mnx5d")

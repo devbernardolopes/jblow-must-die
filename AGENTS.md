@@ -58,6 +58,19 @@ This game is currently being developed and it is in very early stages. No one is
 - `Minimap.Corner` had to be named `MapCorner`: Godot 4.7 has a global `Corner` type that shadows a local enum of the same name and breaks parsing.
 - Circular/rounded clipping happens in `Minimap._draw_geometry()`: world points are transformed to map-local pixels and clipped with `Geometry2D.intersect_polyline_with_polygon` / `intersect_polygons` against a generated circle or rounded-rectangle polygon. There is no clip shader; do not reintroduce one.
 
+## AI Authoring
+
+- Non-player entities use `AIController` (`EntityController` subclass) as the brain and actuator. `Entity` stays unaware of who drives it; `EntityController.tick(delta)` runs at the start of `Entity._physics_process`.
+- `AIController` owns a `BTPlayer` with `update_mode = MANUAL`, so tree decisions and intent share the same physics tick. It also owns the `Blackboard`.
+- `AIPerception` is a `Node2D` child of `Entity` that produces data only: target, visibility, last known position, memory. The controller syncs it to the blackboard every tick.
+- Custom tasks live in `ai/tasks`; extend `EntityBTAction` / `EntityBTCondition`. Use `BTDynamicSelector` / `BTDynamicSequence` when a higher-priority branch must preempt a running one (flee over combat).
+- Use `BTParallel` for simultaneous aim/chase/attack. Its children keep returning `RUNNING`, and `num_successes_required` must exceed the child count.
+- Blackboard keys: `self_entity`, `self_position`, `health_ratio`, `target`, `has_target`, `target_visible`, `target_position`, `target_distance`, `home_position`, `patrol_points`, `patrol_index`, `patrol_point`.
+- Teams are opt-in: `is_hostile_to()` is false when either team is empty. Projectiles pass the shooter as the damage source.
+- Melee uses `Entity.melee_reach_m` / `melee_arc_degrees`, a line-of-sight ray, and the weapon's `base_damage`; it is triggered from the attack animation's `trigger_frame`.
+- Behavior trees are authored as `.tres` under `ai/trees`. `ai/trees/zombie_melee.tres` is the reference tree (flee, combat, patrol).
+- `AIPerception.awareness_radius_m` must stay larger than the combined collision radii (entities are 4 m radius each), otherwise close targets are pushed out of awareness.
+
 ## Testing
 
 All **gameplay** testing is manual by the human after every iteration: do not run the main game scene.
@@ -80,6 +93,7 @@ godot --headless --path . --script res://tests/test_weapon_system.gd
 godot --headless --path . --script res://tests/test_projectiles.gd
 godot --headless --path . --script res://tests/test_player_controller.gd
 godot --headless --path . --script res://tests/test_minimap.gd
+godot --headless --path . --script res://tests/test_ai.gd
 ```
 
 `--import` must report no errors before the tests; the resource test also validates authored `.tres` animation sets, so extend it when adding a set or weapon.
