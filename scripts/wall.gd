@@ -83,6 +83,11 @@ var _outer_sign: float = 1.0
 var _viewer: Node2D
 var _last_viewer := Vector2(NAN, NAN)  # local space; NAN = needs refresh, INF = no viewer
 
+var _side_mesh: ArrayMesh
+var _side_verts := PackedVector2Array()
+var _side_uvs := PackedVector2Array()
+var _side_indices := PackedInt32Array()
+
 func _ready() -> void:
 	if not Engine.is_editor_hint():
 		disable_editor = false
@@ -276,9 +281,9 @@ func _apply_height() -> void:
 	var g := _viewer_global()
 	var local_v := to_local(g) if g.is_finite() else Vector2.INF
 	if local_v == _last_viewer:
-		return  # viewer hasn't moved, nothing to do
+		return  # viewer hasn't moved
 	_last_viewer = local_v
-
+	
 	if local_v.is_finite():
 		var shifted := PackedVector2Array()
 		shifted.resize(_base_points.size())
@@ -287,9 +292,104 @@ func _apply_height() -> void:
 		line.points = shifted
 	else:
 		line.points = _base_points
+	
+	_update_side_mesh()
 	queue_redraw()
+	
+	#if line == null:
+		#return
+	#var g := _viewer_global()
+	#var local_v := to_local(g) if g.is_finite() else Vector2.INF
+	#if local_v == _last_viewer:
+		#return  # viewer hasn't moved, nothing to do
+	#_last_viewer = local_v
+#
+	#if local_v.is_finite():
+		#var shifted := PackedVector2Array()
+		#shifted.resize(_base_points.size())
+		#for i in _base_points.size():
+			#shifted[i] = _base_points[i] + _offset(_base_points[i], local_v)
+		#line.points = shifted
+	#else:
+		#line.points = _base_points
+	#queue_redraw()
 
-func _draw() -> void:
+func _update_side_mesh() -> void:
+	if side_texture == null or not _last_viewer.is_finite() or _outline.is_empty():
+		if _side_mesh:
+			_side_mesh.clear_surfaces()
+		return
+
+	_side_verts.clear()
+	_side_uvs.clear()
+	_side_indices.clear()
+
+	var tex_w := float(side_texture.get_width())
+	var idx := 0
+
+	for poly: PackedVector2Array in _outline:
+		var n: int = poly.size()
+		var u := 0.0
+		for i in n:
+			var a: Vector2 = poly[i]
+			var b: Vector2 = poly[(i + 1) % n]
+			var edge := b - a
+			var edge_len := edge.length()
+			if edge_len < 0.001:
+				continue
+
+			var u0 := u / tex_w
+			u += edge_len
+			var u1 := u / tex_w
+
+			# Normal pointing away from the solid
+			var normal := Vector2(edge.y, -edge.x) / edge_len * _outer_sign
+			if normal.dot(_last_viewer - (a + b) * 0.5) <= 0.0:
+				continue  # back face
+
+			var top_a := a + _offset(a, _last_viewer)
+			var top_b := b + _offset(b, _last_viewer)
+
+			# Quad vertices (bottom → top)
+			_side_verts.append(a)
+			_side_verts.append(b)
+			_side_verts.append(top_b)
+			_side_verts.append(top_a)
+
+			# UVs (bottom of texture = base of wall, top of texture = top of wall)
+			_side_uvs.append(Vector2(u0, 1.0))
+			_side_uvs.append(Vector2(u1, 1.0))
+			_side_uvs.append(Vector2(u1, 0.0))
+			_side_uvs.append(Vector2(u0, 0.0))
+
+			# Two triangles
+			_side_indices.append(idx)
+			_side_indices.append(idx + 1)
+			_side_indices.append(idx + 2)
+			_side_indices.append(idx)
+			_side_indices.append(idx + 2)
+			_side_indices.append(idx + 3)
+			idx += 4
+
+	if _side_verts.is_empty():
+		if _side_mesh:
+			_side_mesh.clear_surfaces()
+		return
+
+	if _side_mesh == null:
+		_side_mesh = ArrayMesh.new()
+	else:
+		_side_mesh.clear_surfaces()
+
+	var arrays: Array = []
+	arrays.resize(Mesh.ARRAY_MAX)
+	arrays[Mesh.ARRAY_VERTEX] = _side_verts
+	arrays[Mesh.ARRAY_TEX_UV] = _side_uvs
+	arrays[Mesh.ARRAY_INDEX] = _side_indices
+
+	_side_mesh.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES, arrays)
+
+func _draw_old() -> void:
 	if side_texture == null or not _last_viewer.is_finite():
 		return
 	var tex_w := float(side_texture.get_width())
@@ -320,3 +420,8 @@ func _draw() -> void:
 				Vector2(u0, 1), Vector2(u1, 1), Vector2(u1, 0), Vector2(u0, 0),
 			])
 			draw_primitive(quad, white, uvs, side_texture)
+
+func _draw() -> void:
+	if _side_mesh == null or _side_mesh.get_surface_count() == 0:
+		return
+	draw_mesh(_side_mesh, side_texture)

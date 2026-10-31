@@ -1,0 +1,19 @@
+[remap]
+
+importer="oggvorbisstr"
+type="AudioStreamOggVorbis"
+uid="uid://dibuo0nbxrsy5"
+path="res://.godot/imported/S31-Sewer Nightclub.ogg-c9f4d38667e4276743a6e435a361e105.oggvorbisstr"
+
+[deps]
+
+source_file="res://assets/musics/S31-Sewer Nightclub.ogg"
+dest_files=["res://.godot/imported/S31-Sewer Nightclub.ogg-c9f4d38667e4276743a6e435a361e105.oggvorbisstr"]
+
+[params]
+
+loop=false
+loop_offset=0
+bpm=0
+beat_count=0
+bar_beats=4

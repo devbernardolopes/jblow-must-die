@@ -243,7 +243,7 @@ func _rebuild() -> void:
 	_rebuilding = true
 	if not is_equal_approx(curve.bake_interval, bake_interval):
 		curve.bake_interval = bake_interval
-
+	
 	_base_points = curve.get_baked_points()
 	_build_leaves(_base_points)
 	_duration = _compute_duration()

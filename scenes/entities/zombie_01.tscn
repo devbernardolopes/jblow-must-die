@@ -1,0 +1,27 @@
+[gd_scene format=3 uid="uid://bea0t18crh5a"]
+
+[ext_resource type="Script" uid="uid://0yh2bjs84b32" path="res://scripts/entity.gd" id="1_lvuec"]
+[ext_resource type="Resource" uid="uid://3d4p405u2gep" path="res://resources/entities/zombies/zombie_001/zombie_001.tres" id="2_8duhx"]
+[ext_resource type="Script" uid="uid://chetgdd278faa" path="res://scripts/ai_controller.gd" id="3_bamwe"]
+[ext_resource type="BehaviorTree" uid="uid://bgmngfae4g64m" path="res://ai/trees/zombie_melee.tres" id="4_mb3f1"]
+[ext_resource type="Script" uid="uid://dk1567yva5stc" path="res://scripts/ai_perception.gd" id="5_7v6sq"]
+
+[node name="Zombie01" type="CharacterBody2D" unique_id=1368648245 node_paths=PackedStringArray("muzzle")]
+collision_layer = 2
+collision_mask = 7
+motion_mode = 1
+script = ExtResource("1_lvuec")
+data = ExtResource("2_8duhx")
+team = &"enemy"
+muzzle = NodePath("Muzzle")
+metadata/_custom_type_script = "uid://0yh2bjs84b32"
+
+[node name="AIController" type="Node" parent="." unique_id=1204961885]
+script = ExtResource("3_bamwe")
+behavior_tree = ExtResource("4_mb3f1")
+run = true
+metadata/_custom_type_script = "uid://chetgdd278faa"
+
+[node name="AIPerception" type="Node2D" parent="." unique_id=10243578]
+script = ExtResource("5_7v6sq")
+metadata/_custom_type_script = "uid://dk1567yva5stc"

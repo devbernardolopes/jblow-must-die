@@ -30,24 +30,53 @@ var collision_polygon: CollisionPolygon2D = null
 
 var _illusion: HeightIllusion = null
 
+var dead: bool = false
+var health: float = 0.00
+
+signal damaged(amount: float, source: Node)
+signal died(source: Node)
 
 func _ready() -> void:
 	collision_layer = PhysicsLayers.OBJECTS
 	collision_mask = PhysicsLayers.WORLD | PhysicsLayers.ENTITIES | PhysicsLayers.OBJECTS | PhysicsLayers.PROJECTILES
 	motion_mode = CharacterBody2D.MOTION_MODE_FLOATING
+	
 	_ensure_visual()
 	_refresh_footprint()
 	# In the editor the collision shape can be edited at any moment, so follow it.
 	set_process(Engine.is_editor_hint())
 
+func _enter_tree() -> void:
+	if data != null:
+		if data.breakable:
+			health = data.health
+			push_warning(health)
 
 func _process(_delta: float) -> void:
 	_refresh_footprint()
 
+## Applies damage, emits `damaged`, and dies when health reaches zero.
+func take_damage(amount: float, source: Node) -> void:
+	push_warning("hit")
+	if dead or amount <= 0.0:
+		return
+	health = maxf(health - amount, 0.0)
+	damaged.emit(amount, source)
+	if health <= 0.0:
+		_die(source)
+
+func _die(source: Node) -> void:
+	if dead:
+		return
+	dead = true
+	velocity = Vector2.ZERO
+	#if animator != null:
+		#animator.cancel_action()
+	died.emit(source)
+	queue_free()
 
 func _on_data_changed() -> void:
 	_ensure_visual()
-
 
 func _find_collision() -> CollisionShape2D:
 	for child: Node in get_children():
@@ -55,20 +84,17 @@ func _find_collision() -> CollisionShape2D:
 			return child as CollisionShape2D
 	return null
 
-
 func _find_collision_polygon() -> CollisionPolygon2D:
 	for child: Node in get_children():
 		if child is CollisionPolygon2D:
 			return child as CollisionPolygon2D
 	return null
 
-
 func _find_existing_illusion() -> HeightIllusion:
 	for child: Node in get_children(true):
 		if child is HeightIllusion:
 			return child as HeightIllusion
 	return null
-
 
 ## Creates the visual once and only updates it afterwards.
 func _ensure_visual() -> void:
@@ -98,7 +124,6 @@ func _ensure_visual() -> void:
 	else:
 		_illusion.height_factor = 0.0
 	_illusion.refresh()
-
 
 ## Footprint = collision shape. Re-found every time so a shape added or removed
 ## in the editor is picked up; in game this runs once.

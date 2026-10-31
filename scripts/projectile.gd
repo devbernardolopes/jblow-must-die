@@ -116,12 +116,15 @@ func _configure_sprite() -> void:
 	sprite.play(animation)
 
 func _on_hitbox_body_entered(body: Node2D) -> void:
+	push_warning(body)
 	if _dead or body == null or body == shooter or body in _hit:
 		return
-	if team != &"" and body.get(&"team") == team:
+	if body.get(&"team") == team:
+	#if team != &"" and body.get(&"team") == team:
 		return
 
 	_hit.append(body)
+	push_warning("body team")
 	if damage > 0.0 and body.has_method(&"take_damage"):
 		var source: Node = shooter if shooter != null and is_instance_valid(shooter) else self
 		body.take_damage(damage, source)

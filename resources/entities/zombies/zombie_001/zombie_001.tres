@@ -1,0 +1,11 @@
+[gd_resource type="Resource" script_class="EntityData" format=3 uid="uid://3d4p405u2gep"]
+
+[ext_resource type="Script" uid="uid://bo74pbkpstasp" path="res://resources/entity_animation_set.gd" id="1_xyrb4"]
+[ext_resource type="Script" uid="uid://b0heyc47lb5h3" path="res://resources/entity_data.gd" id="2_0konf"]
+[ext_resource type="Resource" uid="uid://3q5bw3121f4k" path="res://resources/entities/zombies/zombie_001/zombie_001_animation_set.tres" id="2_bklrt"]
+
+[resource]
+script = ExtResource("2_0konf")
+animation_sets = Array[ExtResource("1_xyrb4")]([ExtResource("2_bklrt")])
+default_animation_set_id = &"hands"
+metadata/_custom_type_script = "uid://b0heyc47lb5h3"
