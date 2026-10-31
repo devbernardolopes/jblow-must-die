@@ -170,10 +170,10 @@ texture = ExtResource("3_kpybi")
 [node name="Objects" type="Node2D" parent="." unique_id=504264520]
 
 [node name="Crate" parent="Objects" unique_id=414730064 instance=ExtResource("4_munwf")]
-position = Vector2(14169, 10835)
+position = Vector2(12714.887, 15031.479)
 
 [node name="NewGameSlot" parent="Objects" unique_id=1116064012 instance=ExtResource("5_navra")]
-position = Vector2(14068, 10347)
+position = Vector2(13161.168, 15110.725)
 rotation = -0.38397244
 
 [node name="NewGameSlot2" parent="Objects" unique_id=1082075903 instance=ExtResource("5_navra")]
@@ -235,7 +235,7 @@ current_weapon = ExtResource("7_lakw3")
 available_weapons = Array[ExtResource("6_7t5mc")]([ExtResource("7_lakw3"), ExtResource("10_7iits"), ExtResource("13_37qwj"), ExtResource("14_37qwj")])
 inventory = Array[ExtResource("17_rup4s")]([ExtResource("19_4kbfs")])
 team = &"player"
-muzzle = NodePath("@Marker2D@20658")
+muzzle = NodePath("@Marker2D@58680")
 metadata/_custom_type_script = "uid://0yh2bjs84b32"
 
 [node name="PlayerController" type="Node" parent="Entities/Hero" unique_id=385327029]
@@ -399,9 +399,13 @@ metadata/_custom_type_script = "uid://cwq11bwr8h2h8"
 [node name="FollowCamera" type="Camera2D" parent="." unique_id=787066361 node_paths=PackedStringArray("target")]
 visible = false
 position = Vector2(13143.87, 15670.586)
-zoom = Vector2(0.5000007, 0.5000007)
+zoom = Vector2(0.5, 0.5)
+process_callback = 0
+position_smoothing_enabled = true
+position_smoothing_speed = 64.0
 script = ExtResource("6_qfnet")
 target = NodePath("../Entities/Hero")
+auto_speed_zoom = 0.5
 metadata/_custom_type_script = "uid://cufxcsg1oinft"
 metadata/_edit_lock_ = true
 
