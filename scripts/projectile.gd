@@ -116,7 +116,7 @@ func _configure_sprite() -> void:
 	sprite.play(animation)
 
 func _on_hitbox_body_entered(body: Node2D) -> void:
-	push_warning(body)
+	#print("_on_hitbox_body_entered = ", body)
 	if _dead or body == null or body == shooter or body in _hit:
 		return
 	if body.get(&"team") == team:
@@ -124,7 +124,6 @@ func _on_hitbox_body_entered(body: Node2D) -> void:
 		return
 
 	_hit.append(body)
-	push_warning("body team")
 	if damage > 0.0 and body.has_method(&"take_damage"):
 		var source: Node = shooter if shooter != null and is_instance_valid(shooter) else self
 		body.take_damage(damage, source)
@@ -148,7 +147,7 @@ func _die() -> void:
 	set_physics_process(false)
 	wall_shape.set_deferred(&"disabled", true)
 	hit_shape.set_deferred(&"disabled", true)
-	hitbox.set_deferred(&"monitoring", false)
+	#hitbox.set_deferred(&"monitoring", false)
 
 	var impact: StringName = data.impact_animation if data != null else &""
 	if not sprite.visible or sprite.sprite_frames == null or not sprite.sprite_frames.has_animation(impact):

@@ -16,6 +16,11 @@ extends CharacterBody2D
 			data.changed.connect(_on_data_changed)
 		_ensure_visual()
 
+@export var use_glass_crack_effect: bool = false:
+	set(v):
+		use_glass_crack_effect = v
+		_toggle_glass_crack_effect(v)
+
 @export_group("Editor preview")
 ## Editor only: where the "eye" is when the edited scene has no node in the
 ## "door_viewer" group. Ignored in game.
@@ -36,9 +41,39 @@ var health: float = 0.00
 signal damaged(amount: float, source: Node)
 signal died(source: Node)
 
+func _get_color_rect_node_for_glass_crack_effect() -> ColorRectImpactGlass:
+	var _children = get_children()
+	var _color_rect: ColorRectImpactGlass = null
+	if _children and not _children.is_empty():
+		for i in _children.size():
+			var _child = _children[i]
+			if _child is ColorRectImpactGlass:
+				_child = _children[i]
+				return _child
+	return null
+
+func _toggle_glass_crack_effect(_toggle: bool) -> void:
+	var _color_rect: ColorRectImpactGlass = _get_color_rect_node_for_glass_crack_effect()
+	
+	if _color_rect:
+		remove_child(_color_rect)
+		_color_rect = null
+	
+	if _toggle:
+		_color_rect = ColorRectImpactGlass.new()
+		_color_rect.set_anchors_preset(Control.PRESET_FULL_RECT)
+		add_child(_color_rect)
+
+func apply_crack(_point: Vector2 = Vector2.ZERO) -> void:
+	if use_glass_crack_effect:
+		var _color_rect: ColorRectImpactGlass = _get_color_rect_node_for_glass_crack_effect()
+		if not _color_rect:
+			return
+		_color_rect.trigger_crack(_point)
+
 func _ready() -> void:
-	collision_layer = PhysicsLayers.OBJECTS
-	collision_mask = PhysicsLayers.WORLD | PhysicsLayers.ENTITIES | PhysicsLayers.OBJECTS | PhysicsLayers.PROJECTILES
+	#collision_layer = PhysicsLayers.OBJECTS
+	#collision_mask = PhysicsLayers.WORLD | PhysicsLayers.ENTITIES | PhysicsLayers.OBJECTS | PhysicsLayers.PROJECTILES
 	motion_mode = CharacterBody2D.MOTION_MODE_FLOATING
 	
 	_ensure_visual()
@@ -51,17 +86,25 @@ func _enter_tree() -> void:
 		if data != null:
 			if data.breakable:
 				health = data.health
-				push_warning(health)
+				
+				print("breakable health = %d" % health)
+				print("collision_layer = %d" % collision_layer)
+				print("collision_mask = %d" % collision_mask)
 
 func _process(_delta: float) -> void:
-	_refresh_footprint()
+	if not collision or not collision_polygon:
+		_refresh_footprint()
+		if collision != null and collision.shape != null:
+			print("collision.shape.get_rect() = %f" % collision.shape.get_rect().get_area())
 
 ## Applies damage, emits `damaged`, and dies when health reaches zero.
 func take_damage(amount: float, source: Node) -> void:
-	push_warning("hit")
+	#print("hit")
 	if dead or amount <= 0.0:
 		return
 	health = maxf(health - amount, 0.0)
+	if use_glass_crack_effect:
+		pass
 	damaged.emit(amount, source)
 	if health <= 0.0:
 		_die(source)
@@ -129,16 +172,17 @@ func _ensure_visual() -> void:
 ## Footprint = collision shape. Re-found every time so a shape added or removed
 ## in the editor is picked up; in game this runs once.
 func _refresh_footprint() -> void:
-	if _illusion == null:
-		return
-	collision = _find_collision()
-	collision_polygon = _find_collision_polygon()
-	var points := PackedVector2Array()
-	if collision != null and collision.shape != null:
-		points = HeightIllusion.footprint_from_shape(collision.shape, collision.transform)
-	elif collision_polygon != null:
-		points = HeightIllusion.footprint_from_polygon(
-			collision_polygon.polygon, collision_polygon.transform
-		)
-	if points != _illusion.get_footprint():
-		_illusion.set_footprint(points)
+	if not Engine.is_editor_hint():
+		if _illusion == null:
+			return
+		collision = _find_collision()
+		collision_polygon = _find_collision_polygon()
+		var points := PackedVector2Array()
+		if collision != null and collision.shape != null:
+			print("collision.shape.get_rect() = %f" % collision.shape.get_rect().get_area())
+			points = HeightIllusion.footprint_from_shape(collision.shape, collision.transform)
+		elif collision_polygon != null:
+			print("collision_polygon.shape.get_rect() = %f" % collision_polygon.shape.get_rect().get_area())
+			points = HeightIllusion.footprint_from_polygon(collision_polygon.polygon, collision_polygon.transform)
+		if points != _illusion.get_footprint():
+			_illusion.set_footprint(points)

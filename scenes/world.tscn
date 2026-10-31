@@ -11,7 +11,6 @@
 [ext_resource type="Script" uid="uid://cwq11bwr8h2h8" path="res://scripts/wall.gd" id="4_71j4m"]
 [ext_resource type="PackedScene" uid="uid://d4a5mcj645qe4" path="res://scenes/objects/crate.tscn" id="4_munwf"]
 [ext_resource type="Texture2D" uid="uid://ccfh5hvi4rtn" path="res://assets/images/textures/splatter_01.png" id="5_hi6a0"]
-[ext_resource type="PackedScene" uid="uid://b1sw3pic0adx7" path="res://scenes/objects/new_game_slot.tscn" id="5_navra"]
 [ext_resource type="Texture2D" uid="uid://cob4ubhuebdyg" path="res://assets/images/textures/mtl_g01metaltrim02b.png" id="5_qfnet"]
 [ext_resource type="Script" uid="uid://cg1uto20g3kh3" path="res://scripts/walls_helper.gd" id="5_w7kh3"]
 [ext_resource type="Script" uid="uid://bln4irpuvk00t" path="res://resources/weapon_data.gd" id="6_7t5mc"]
@@ -182,15 +181,10 @@ polygon = PackedVector2Array(184.2002, -212.83105, 705.2002, -67.831055, 923.200
 [node name="Objects" type="Node2D" parent="." unique_id=504264520]
 
 [node name="Crate" parent="Objects" unique_id=414730064 instance=ExtResource("4_munwf")]
-position = Vector2(15662.639, 7810.7783)
+position = Vector2(15233.689, 7703.892)
 
-[node name="NewGameSlot" parent="Objects" unique_id=1116064012 instance=ExtResource("5_navra")]
-position = Vector2(13161.168, 15110.725)
-rotation = -0.38397244
-
-[node name="NewGameSlot2" parent="Objects" unique_id=1082075903 instance=ExtResource("5_navra")]
-position = Vector2(14740.501, 10599.436)
-rotation = 0.5131268
+[node name="Crate2" parent="Objects" unique_id=1705056570 instance=ExtResource("4_munwf")]
+position = Vector2(15438.799, 7754.982)
 
 [node name="Entities" type="Node2D" parent="." unique_id=1738183308]
 y_sort_enabled = true
@@ -242,7 +236,7 @@ current_weapon = ExtResource("8_6oujy")
 available_weapons = Array[ExtResource("6_7t5mc")]([ExtResource("8_6oujy")])
 
 [node name="Hero" type="CharacterBody2D" parent="Entities" unique_id=1469266724 node_paths=PackedStringArray("muzzle")]
-position = Vector2(14978.389, 7972.4004)
+position = Vector2(14992, 7926)
 collision_layer = 2
 collision_mask = 7
 motion_mode = 1
@@ -254,7 +248,7 @@ current_weapon = ExtResource("7_lakw3")
 available_weapons = Array[ExtResource("6_7t5mc")]([ExtResource("7_lakw3"), ExtResource("10_7iits"), ExtResource("13_37qwj"), ExtResource("14_37qwj")])
 inventory = Array[ExtResource("17_rup4s")]([ExtResource("19_4kbfs")])
 team = &"player"
-muzzle = NodePath("@Marker2D@27684")
+muzzle = NodePath("@Marker2D@140593")
 metadata/_custom_type_script = "uid://0yh2bjs84b32"
 
 [node name="PlayerController" type="Node" parent="Entities/Hero" unique_id=385327029]
@@ -419,7 +413,7 @@ metadata/_custom_type_script = "uid://cwq11bwr8h2h8"
 
 [node name="FollowCamera" type="Camera2D" parent="." unique_id=787066361 node_paths=PackedStringArray("target")]
 visible = false
-position = Vector2(14978.389, 7972.4004)
+position = Vector2(14992, 7926)
 zoom = Vector2(0.40000036, 0.40000036)
 process_callback = 0
 position_smoothing_enabled = true
