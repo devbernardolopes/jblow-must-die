@@ -6,7 +6,6 @@
 [resource]
 script = ExtResource("1_7tuwy")
 id = &"new_game_slot"
-breakable = true
 obstacle = true
 visual = ExtResource("2_rxfuh")
 metadata/_custom_type_script = "uid://cog0wbgn2dyrp"

@@ -9,7 +9,7 @@ size = Vector2(507, 507)
 [node name="Crate" type="CharacterBody2D" unique_id=414730064]
 scale = Vector2(0.3, 0.3)
 collision_layer = 4
-collision_mask = 7
+collision_mask = 15
 motion_mode = 1
 script = ExtResource("1_yourn")
 data = ExtResource("2_ls5c6")

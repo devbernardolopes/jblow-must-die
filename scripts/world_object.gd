@@ -47,10 +47,11 @@ func _ready() -> void:
 	set_process(Engine.is_editor_hint())
 
 func _enter_tree() -> void:
-	if data != null:
-		if data.breakable:
-			health = data.health
-			push_warning(health)
+	if not Engine.is_editor_hint():
+		if data != null:
+			if data.breakable:
+				health = data.health
+				push_warning(health)
 
 func _process(_delta: float) -> void:
 	_refresh_footprint()
