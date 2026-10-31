@@ -21,13 +21,7 @@ var _dead: bool = false
 @onready var hitbox: Area2D = $Hitbox
 @onready var hit_shape: CollisionShape2D = $Hitbox/CollisionShape2D
 
-static func spawn(
-	p_data: ProjectileData,
-	pos: Vector2,
-	dir: Vector2,
-	p_shooter: Node2D,
-	p_damage: float = -1.0
-) -> Projectile:
+static func spawn(p_data: ProjectileData, pos: Vector2, dir: Vector2, p_shooter: Node2D, p_damage: float = -1.0) -> Projectile:
 	if p_data == null or p_shooter == null or not p_shooter.is_inside_tree():
 		return null
 	var tree: SceneTree = p_shooter.get_tree()

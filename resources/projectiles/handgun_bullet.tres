@@ -54,3 +54,4 @@ sprite_frames = Array[SpriteFrames]([SubResource("SpriteFrames_m7uww")])
 animation = &"fly"
 impact_animation = &"impact"
 damage = 10.0
+scale_adjustment = 0.025

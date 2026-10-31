@@ -102,11 +102,9 @@ func setup(points: PackedVector2Array) -> void:
 	_apply_style()
 	_rebuild()
 
-
 ## Length of the panel centerline, in pixels. Used to derive travel distances.
 func get_length() -> float:
 	return _length
-
 
 func _ensure_nodes() -> void:
 	if line == null:
@@ -116,7 +114,8 @@ func _ensure_nodes() -> void:
 	if body == null:
 		body = AnimatableBody2D.new()
 		body.name = "Body"
-		body.sync_to_physics = true
+		#body.sync_to_physics = true
+		body.sync_to_physics = false
 		body.collision_layer = PhysicsLayers.OBJECTS
 		body.collision_mask = 0
 		add_child(body, false, Node.INTERNAL_MODE_FRONT)
@@ -124,7 +123,6 @@ func _ensure_nodes() -> void:
 		occluders = Node2D.new()
 		occluders.name = "Occluders"
 		add_child(occluders, false, Node.INTERNAL_MODE_FRONT)
-
 
 func _apply_style() -> void:
 	if line == null:

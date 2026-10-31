@@ -41,8 +41,8 @@ func _ready() -> void:
 	
 	# Keep smoothing and the follow update on the physics clock. Idle-time smoothing
 	# catches up between physics ticks and makes moving sprites jitter backwards.
-	process_callback = Camera2D.CAMERA2D_PROCESS_PHYSICS
-	position_smoothing_enabled = true
+	#process_callback = Camera2D.CAMERA2D_PROCESS_PHYSICS
+	#position_smoothing_enabled = true
 	zoom = default_zoom
 	_manual_zoom = default_zoom
 	add_to_group("wall_viewer")

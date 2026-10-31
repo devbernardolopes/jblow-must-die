@@ -135,23 +135,23 @@ var _leaf_lengths: Array[float] = []
 var _duration: float = MIN_DURATION
 var _target_progress: float = 0.0
 
-var _outline: Array = []  # polygons around the door footprint
-var body: StaticBody2D = null
+#var _outline: Array = []  # polygons around the door footprint
+#var body: StaticBody2D = null
 var _base_points := PackedVector2Array()
-var _outer_sign: float = 1.0
+#var _outer_sign: float = 1.0
 
 func _ready() -> void:
 	if not Engine.is_editor_hint():
 		disable_editor = false
-
+	
+	#body = StaticBody2D.new()
+	#body.name = "Body"
+	#body.collision_layer = PhysicsLayers.OBJECTS
+	#body.collision_mask = 0
+	#add_child(body, false, Node.INTERNAL_MODE_FRONT)
+	
 	add_to_group(MINIMAP_SOURCE_GROUP)
 	rebuild()
-	
-	body = StaticBody2D.new()
-	body.name = "Body"
-	body.collision_layer = PhysicsLayers.OBJECTS
-	body.collision_mask = 0
-	add_child(body, false, Node.INTERNAL_MODE_FRONT)
 	
 	progress = 1.0 if starts_open else 0.0
 	_target_progress = progress
@@ -159,11 +159,9 @@ func _ready() -> void:
 	_set_state(DoorState.OPENED if starts_open else DoorState.CLOSED)
 	call_deferred(&"_refresh_after_ready")
 
-
 func _refresh_after_ready() -> void:
 	_sync_interactable()
 	_notify_minimap_changed()
-
 
 func _process(_delta: float) -> void:
 	if disable_editor:
@@ -176,7 +174,6 @@ func _process(_delta: float) -> void:
 		if curve:
 			curve.changed.connect(_rebuild)
 		_rebuild()
-
 
 func _physics_process(delta: float) -> void:
 	if Engine.is_editor_hint():
@@ -235,13 +232,10 @@ func _set_state(value: DoorState) -> void:
 	_sync_interactable()
 	state_changed.emit(state)
 
-
 # --- Building ---
-
 ## Rebuilds every panel from the authored curve. Safe to call at any time.
 func rebuild() -> void:
 	_rebuild()
-
 
 func _rebuild() -> void:
 	if _rebuilding or curve == null:
@@ -251,13 +245,12 @@ func _rebuild() -> void:
 		curve.bake_interval = bake_interval
 
 	_base_points = curve.get_baked_points()
-	#_build_leaves(curve.get_baked_points())
 	_build_leaves(_base_points)
 	_duration = _compute_duration()
 	_apply_progress()
 	_sync_interactable()
-	_build_outline()
-	_rebuild_collision()
+	#_build_outline()
+	#_rebuild_collision()
 	_notify_minimap_changed()
 	_rebuilding = false
 
@@ -269,45 +262,45 @@ static func _signed_area(poly: PackedVector2Array) -> float:
 		a += p.x * q.y - q.x * p.y
 	return a * 0.5
 
-func _build_outline() -> void:
-	_outline = []
-	var pts := _base_points
-	if pts.size() < 2:
-		return
-	# First point == last point means a closed loop (a room)
-	var _closed := pts.size() > 2 and pts[0].distance_to(pts[pts.size() - 1]) < 0.01
-	if _closed:
-		pts = pts.slice(0, pts.size() - 1)
-	var end_type := Geometry2D.END_JOINED if _closed else Geometry2D.END_BUTT
-	_outline = Geometry2D.offset_polyline(pts, width * 0.5, Geometry2D.JOIN_MITER, end_type)
-
-	# Outer polygons share one orientation, holes have the opposite one.
-	# The biggest polygon is always an outer one, so it defines the convention.
-	var best := 0.0
-	for poly in _outline:
-		var a := _signed_area(poly)
-		if absf(a) > absf(best):
-			best = a
-	_outer_sign = signf(best) if best != 0.0 else 1.0
-	
-func _rebuild_collision() -> void:
-	if body == null:
-		return
-	for child in body.get_children():
-		body.remove_child(child)
-		child.queue_free()
-	if not solid:
-		return
-	for poly in _outline:
-		var segs := PackedVector2Array()
-		for i in poly.size():
-			segs.append(poly[i])
-			segs.append(poly[(i + 1) % poly.size()])
-		var shape := ConcavePolygonShape2D.new()
-		shape.segments = segs
-		var cs := CollisionShape2D.new()
-		cs.shape = shape
-		body.add_child(cs)
+#func _build_outline() -> void:
+	#_outline = []
+	#var pts := _base_points
+	#if pts.size() < 2:
+		#return
+	## First point == last point means a closed loop (a room)
+	#var _closed := pts.size() > 2 and pts[0].distance_to(pts[pts.size() - 1]) < 0.01
+	#if _closed:
+		#pts = pts.slice(0, pts.size() - 1)
+	#var end_type := Geometry2D.END_JOINED if _closed else Geometry2D.END_BUTT
+	#_outline = Geometry2D.offset_polyline(pts, width * 0.5, Geometry2D.JOIN_MITER, end_type)
+#
+	## Outer polygons share one orientation, holes have the opposite one.
+	## The biggest polygon is always an outer one, so it defines the convention.
+	#var best := 0.0
+	#for poly in _outline:
+		#var a := _signed_area(poly)
+		#if absf(a) > absf(best):
+			#best = a
+	#_outer_sign = signf(best) if best != 0.0 else 1.0
+	#
+#func _rebuild_collision() -> void:
+	#if body == null:
+		#return
+	#for child in body.get_children():
+		#body.remove_child(child)
+		#child.queue_free()
+	#if not solid:
+		#return
+	#for poly in _outline:
+		#var segs := PackedVector2Array()
+		#for i in poly.size():
+			#segs.append(poly[i])
+			#segs.append(poly[(i + 1) % poly.size()])
+		#var shape := ConcavePolygonShape2D.new()
+		#shape.segments = segs
+		#var cs := CollisionShape2D.new()
+		#cs.shape = shape
+		#body.add_child(cs)
 		
 func _build_leaves(points: PackedVector2Array) -> void:
 	if leaves.is_empty():
@@ -437,22 +430,17 @@ func _compute_duration() -> float:
 			)
 	return maxf(travel / maxf(open_speed, 1.0), MIN_DURATION)
 
-
 ## Places every leaf at its current progress. Also used to snap the initial state.
 func _apply_progress() -> void:
 	var clamped: float = clampf(progress, 0.0, 1.0)
 	for index: int in range(leaves.size()):
 		if index >= _closed_transforms.size():
 			break
-		leaves[index].transform = _closed_transforms[index].interpolate_with(
-			_open_transforms[index], clamped
-		)
-
+		leaves[index].transform = _closed_transforms[index].interpolate_with(_open_transforms[index], clamped)
 
 func _apply_style() -> void:
 	for leaf: DoorLeaf in leaves:
 		_apply_leaf_style(leaf)
-
 
 func _apply_leaf_style(leaf: DoorLeaf) -> void:
 	leaf.texture = texture
@@ -489,13 +477,11 @@ func _sync_interactable() -> void:
 	interactable.set_radius_m(interaction_radius_m)
 	interactable.prompt_text = get_interaction_prompt()
 
-
 func _find_existing_interactable() -> Interactable:
 	for child: Node in get_children(true):
 		if child is Interactable and child.is_internal():
 			return child as Interactable
 	return null
-
 
 ## Midpoint of the authored curve, in Door-local space. The Door never moves,
 ## so this stays fixed in the world while the panels slide or swing.

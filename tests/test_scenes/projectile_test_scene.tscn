@@ -1,0 +1,9 @@
+[gd_scene format=3 uid="uid://dvdwday7pby60"]
+
+[ext_resource type="Texture2D" uid="uid://b6gr0btardkd5" path="res://assets/images/projectiles/bullet1.png" id="1_qhy80"]
+
+[node name="ProjectileTestScene" type="Node2D" unique_id=1606454671]
+
+[node name="Sprite2D" type="Sprite2D" parent="." unique_id=7380594]
+scale = Vector2(0.025, 0.025)
+texture = ExtResource("1_qhy80")

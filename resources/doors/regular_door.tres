@@ -6,4 +6,5 @@
 [resource]
 script = ExtResource("1_wlkkm")
 id = &"regular_door"
+automatic = true
 metadata/_custom_type_script = "uid://dgvb5qp23bje5"
