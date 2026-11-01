@@ -12,4 +12,4 @@ func _ready() -> void:
 	if outer_walls:
 		outer_walls.visible = true
 		
-	MusicManager.play_01()
+	MusicManager.play_02()

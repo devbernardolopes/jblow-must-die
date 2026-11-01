@@ -10,7 +10,6 @@ id = &"crate"
 obstacle = true
 visual = ExtResource("2_f01r5")
 breakable = true
-health = 20.0
 side_texture = ExtResource("2_bw558")
 height_factor = 0.03
 metadata/_custom_type_script = "uid://cog0wbgn2dyrp"

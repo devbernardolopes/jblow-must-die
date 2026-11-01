@@ -43,6 +43,10 @@
 [ext_resource type="Texture2D" uid="uid://ccdb76i7csweg" path="res://assets/images/textures/mtl_g01metaltrim01.png" id="33_l8ah6"]
 [ext_resource type="Texture2D" uid="uid://oa36apxu8qdl" path="res://assets/images/textures/mtl_g01greymetal03.png" id="34_e75v4"]
 [ext_resource type="Texture2D" uid="uid://c7vnvotmxq71j" path="res://assets/images/textures/mtl_g01metaltile01.png" id="37_rga7q"]
+[ext_resource type="Shader" uid="uid://dwqnave81krqk" path="res://shaders/screen_damage_flash.gdshader" id="44_hi6a0"]
+[ext_resource type="Script" uid="uid://c67i4ly7ok1n0" path="res://scripts/shader_helpers/screen_damage_flash.gd" id="45_eo1xk"]
+[ext_resource type="Shader" uid="uid://q2wxasudoddo" path="res://shaders/film_grain.gdshader" id="46_18clu"]
+[ext_resource type="Shader" uid="uid://dsruv1cxrmnfh" path="res://shaders/darkness_weighted_film_grain.gdshader" id="47_4wdv8"]
 
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_m7uww"]
 shader = ExtResource("2_oo54l")
@@ -152,6 +156,24 @@ _data = {
 }
 point_count = 7
 
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_7tiev"]
+shader = ExtResource("44_hi6a0")
+shader_parameter/flash_color = Color(1, 0, 0, 1)
+shader_parameter/intensity = 0.0
+shader_parameter/edge_power = 2.5
+shader_parameter/inner_ratio = 0.75
+shader_parameter/feather = 0.4
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_4y28s"]
+shader = ExtResource("46_18clu")
+shader_parameter/grain_amount = 0.05
+shader_parameter/grain_size = 1.00000004424012
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_qvluj"]
+shader = ExtResource("47_4wdv8")
+shader_parameter/strength = 4.0
+shader_parameter/exponent = 20.0
+
 [node name="World" type="Node2D" unique_id=1936967746]
 script = ExtResource("1_6oujy")
 
@@ -181,10 +203,12 @@ polygon = PackedVector2Array(184.2002, -212.83105, 705.2002, -67.831055, 923.200
 [node name="Objects" type="Node2D" parent="." unique_id=504264520]
 
 [node name="Crate" parent="Objects" unique_id=414730064 instance=ExtResource("4_munwf")]
-position = Vector2(15233.689, 7703.892)
+position = Vector2(15302.523, 7795.107)
+use_glass_crack_effect = true
 
-[node name="Crate2" parent="Objects" unique_id=1705056570 instance=ExtResource("4_munwf")]
-position = Vector2(15438.799, 7754.982)
+[node name="Crate2" parent="Objects" unique_id=1291324439 instance=ExtResource("4_munwf")]
+position = Vector2(15302, 7993)
+use_glass_crack_effect = true
 
 [node name="Entities" type="Node2D" parent="." unique_id=1738183308]
 y_sort_enabled = true
@@ -236,7 +260,7 @@ current_weapon = ExtResource("8_6oujy")
 available_weapons = Array[ExtResource("6_7t5mc")]([ExtResource("8_6oujy")])
 
 [node name="Hero" type="CharacterBody2D" parent="Entities" unique_id=1469266724 node_paths=PackedStringArray("muzzle")]
-position = Vector2(14992, 7926)
+position = Vector2(14944, 7814)
 collision_layer = 2
 collision_mask = 7
 motion_mode = 1
@@ -248,7 +272,7 @@ current_weapon = ExtResource("7_lakw3")
 available_weapons = Array[ExtResource("6_7t5mc")]([ExtResource("7_lakw3"), ExtResource("10_7iits"), ExtResource("13_37qwj"), ExtResource("14_37qwj")])
 inventory = Array[ExtResource("17_rup4s")]([ExtResource("19_4kbfs")])
 team = &"player"
-muzzle = NodePath("@Marker2D@140593")
+muzzle = NodePath("@Marker2D@26750")
 metadata/_custom_type_script = "uid://0yh2bjs84b32"
 
 [node name="PlayerController" type="Node" parent="Entities/Hero" unique_id=385327029]
@@ -413,7 +437,7 @@ metadata/_custom_type_script = "uid://cwq11bwr8h2h8"
 
 [node name="FollowCamera" type="Camera2D" parent="." unique_id=787066361 node_paths=PackedStringArray("target")]
 visible = false
-position = Vector2(14992, 7926)
+position = Vector2(14944, 7814)
 zoom = Vector2(0.40000036, 0.40000036)
 process_callback = 0
 position_smoothing_enabled = true
@@ -452,3 +476,31 @@ grow_vertical = 0
 corner_radius = 0.0
 target = NodePath("../../Entities/Hero")
 show_other_entities = true
+
+[node name="ScreenDamageFlash" type="ColorRect" parent="Hud" unique_id=47418502 node_paths=PackedStringArray("target")]
+material = SubResource("ShaderMaterial_7tiev")
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("45_eo1xk")
+target = NodePath("../../Objects/Crate")
+
+[node name="FilmGrain" type="ColorRect" parent="Hud" unique_id=312404065]
+visible = false
+material = SubResource("ShaderMaterial_4y28s")
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="DarknessWeightedFilmGrain" type="ColorRect" parent="Hud" unique_id=1976219783]
+visible = false
+material = SubResource("ShaderMaterial_qvluj")
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2

@@ -14,8 +14,13 @@ func _ready() -> void:
 func play_01(_fade_time: float = 1.0) -> void:
 	if main_audio_stream_player:
 		main_audio_stream_player.stream = ENDLESS_CYBER_RUNNER
-		
 		main_audio_stream_player.play()
+
+func play_02(_fade_time: float = 1.0) -> void:
+	if main_audio_stream_player:
+		main_audio_stream_player.stream = S_31_NIGHT_PROWLER
+		main_audio_stream_player.play()
+
 #
 #func play(stream: AudioStream, fade_time: float = 1.0) -> void:
 	##ENDLESS_CYBER_RUNNER.get_instance_id()
