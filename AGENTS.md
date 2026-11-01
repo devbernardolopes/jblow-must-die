@@ -58,6 +58,16 @@ This game is currently being developed and it is in very early stages. No one is
 - `Minimap.Corner` had to be named `MapCorner`: Godot 4.7 has a global `Corner` type that shadows a local enum of the same name and breaks parsing.
 - Circular/rounded clipping happens in `Minimap._draw_geometry()`: world points are transformed to map-local pixels and clipped with `Geometry2D.intersect_polyline_with_polygon` / `intersect_polygons` against a generated circle or rounded-rectangle polygon. There is no clip shader; do not reintroduce one.
 
+## Follow Camera Authoring
+
+- `FollowCamera` writes `global_position` directly on the physics clock, after entities, and keeps Camera2D position smoothing off. Do not re-enable built-in smoothing while also smoothing the follow position manually; the two layers make the target drift behind centre and jitter.
+- Zoom is a framing decision, not a speed meter. `base_zoom` is the resting scale; `sprint_zoom` is an optional slow state that needs `sprint_hold_s` of sustained running and holds for `sprint_release_s` after stopping. Do not turn raw `velocity` into a per-frame zoom curve.
+- Lead is authored in screen pixels (`aim_lead_px`, `move_lead_px`, `max_lead_px`) so the apparent offset is stable at every zoom. Aim uses `Entity.facing`, not the live cursor world position: moving the camera also moves the cursor's world position.
+- The lead must survive stopping. `Entity.facing` persists after movement ends, so a stopped player still looks ahead at what they are aiming at.
+- Exponential smoothing must be snapped at a sub-pixel epsilon (`zoom_snap`, `lead_snap_px`) or a tween/spring must be used. A raw exponential never reaches its goal and leaves visible micro-pan/zoom tails.
+- Shake is event-driven trauma (attacks, damage, death) applied to `global_position`, not to `Camera2D.offset`, so the wall/door height illusion follows the shaken viewer.
+- The camera is `@tool` for editor wall previews, but its follow logic is guarded by `Engine.is_editor_hint()`. Do not let runtime camera position/zoom write back into the saved scene.
+
 ## Door Authoring
 
 - Doors are authored like walls: a `Door` (`Path2D`, `@tool`) in the World scene whose curve is the closed footprint (two points). The Door node is a fixed anchor and never moves; only its `DoorLeaf` children animate.
@@ -105,6 +115,7 @@ godot --headless --path . --script res://tests/test_weapon_system.gd
 godot --headless --path . --script res://tests/test_projectiles.gd
 godot --headless --path . --script res://tests/test_player_controller.gd
 godot --headless --path . --script res://tests/test_minimap.gd
+godot --headless --path . --script res://tests/test_follow_camera.gd
 godot --headless --path . --script res://tests/test_door.gd
 godot --headless --path . --script res://tests/test_ai.gd
 ```

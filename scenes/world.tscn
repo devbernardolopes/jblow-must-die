@@ -26,6 +26,7 @@
 [ext_resource type="Texture2D" uid="uid://d3p2lfsxj7y5c" path="res://assets/images/textures/mtl_g01greymetal05.png" id="17_7iits"]
 [ext_resource type="Script" uid="uid://cmkgcvkcxkvn4" path="res://resources/item_data.gd" id="17_rup4s"]
 [ext_resource type="Resource" uid="uid://cy76rhdrb5hox" path="res://resources/items/handgun_magazine_item.tres" id="19_4kbfs"]
+[ext_resource type="Resource" uid="uid://bcvwdktaiqit2" path="res://resources/items/red_dot_handgun_item.tres" id="19_d46x8"]
 [ext_resource type="Script" uid="uid://unw2ftguph2y" path="res://scripts/player_interaction.gd" id="22_817gm"]
 [ext_resource type="Script" uid="uid://kkor13v8fx4b" path="res://scripts/door.gd" id="22_x2olw"]
 [ext_resource type="Script" uid="uid://cl0j1kino70ie" path="res://scripts/hud.gd" id="23_kpybi"]
@@ -267,12 +268,11 @@ motion_mode = 1
 script = ExtResource("1_rwgxs")
 data = ExtResource("2_4wyf3")
 speed_multiplier = 3.0
-collision_offset = Vector2(-12, 13)
 current_weapon = ExtResource("7_lakw3")
 available_weapons = Array[ExtResource("6_7t5mc")]([ExtResource("7_lakw3"), ExtResource("10_7iits"), ExtResource("13_37qwj"), ExtResource("14_37qwj")])
-inventory = Array[ExtResource("17_rup4s")]([ExtResource("19_4kbfs")])
+inventory = Array[ExtResource("17_rup4s")]([ExtResource("19_4kbfs"), ExtResource("19_d46x8")])
 team = &"player"
-muzzle = NodePath("@Marker2D@26750")
+muzzle = NodePath("@Marker2D@41861")
 metadata/_custom_type_script = "uid://0yh2bjs84b32"
 
 [node name="PlayerController" type="Node" parent="Entities/Hero" unique_id=385327029]
@@ -438,13 +438,10 @@ metadata/_custom_type_script = "uid://cwq11bwr8h2h8"
 [node name="FollowCamera" type="Camera2D" parent="." unique_id=787066361 node_paths=PackedStringArray("target")]
 visible = false
 position = Vector2(14944, 7814)
-zoom = Vector2(0.40000036, 0.40000036)
+zoom = Vector2(0.4, 0.4)
 process_callback = 0
-position_smoothing_enabled = true
-position_smoothing_speed = 64.0
 script = ExtResource("6_qfnet")
 target = NodePath("../Entities/Hero")
-auto_idle_zoom = 0.4
 metadata/_custom_type_script = "uid://cufxcsg1oinft"
 metadata/_edit_lock_ = true
 
